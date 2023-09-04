@@ -54,6 +54,8 @@ async function main() {
         'salt',
         'zkEVMDeployerAddress',
         'maticTokenAddress',
+        'setupEmptyCommittee',
+        'committeeTimelock',
     ];
 
     for (const parameterName of mandatoryDeploymentParameters) {
