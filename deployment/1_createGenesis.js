@@ -293,10 +293,10 @@ async function main() {
         address: deployer.address,
     });
 
-    if (argv.test) {
-        // Add tester account with ether
-        genesis[genesis.length - 1].balance = '100000000000000000000000';
-    }
+    // if (argv.test) {
+    // Add tester account with ether
+    genesis[genesis.length - 1].balance = '100000000000000000000000';
+    // }
 
     // calculate root
     const poseidon = await getPoseidon();

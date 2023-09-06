@@ -2,6 +2,6 @@
 
 pragma solidity 0.8.17;
 
-interface ISupernets2DataCommittee {
+interface IDataCommittee {
     function verifySignatures(bytes32 hash, bytes memory signaturesAndAddrs) external view;
 }

@@ -157,8 +157,8 @@ contract PolygonZkEVM is
     // PolygonZkEVM Bridge Address
     IPolygonZkEVMBridge public immutable bridgeAddress;
 
-    // Supernets2 Data Committee Address
-    ISupernets2DataCommittee public immutable dataCommitteeAddress;
+    // Data Committee Address
+    IDataCommittee public immutable dataCommitteeAddress;
 
     // L2 chain identifier
     uint64 public immutable chainID;
@@ -385,7 +385,7 @@ contract PolygonZkEVM is
         IERC20Upgradeable _matic,
         IVerifierRollup _rollupVerifier,
         IPolygonZkEVMBridge _bridgeAddress,
-        ISupernets2DataCommittee _dataCommitteeAddress,
+        IDataCommittee _dataCommitteeAddress,
         uint64 _chainID,
         uint64 _forkID
     ) {
