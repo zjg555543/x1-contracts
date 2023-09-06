@@ -100,6 +100,13 @@ describe('Real flow test', () => {
         const polygonZkEVMBridgeFactory = await ethers.getContractFactory('PolygonZkEVMBridge');
         polygonZkEVMBridgeContract = await upgrades.deployProxy(polygonZkEVMBridgeFactory, [], { initializer: false });
 
+        // deploy CDKDataCommittee
+        const dataCommitteeFactory = await ethers.getContractFactory('DataCommittee');
+        dataCommitteeContract = await upgrades.deployProxy(
+            dataCommitteeFactory,
+            [],
+            { initializer: false },
+        );
         // deploy PolygonZkEVMMock
         const PolygonZkEVMFactory = await ethers.getContractFactory('PolygonZkEVMMock');
         polygonZkEVMContract = await upgrades.deployProxy(PolygonZkEVMFactory, [], {

@@ -21,4 +21,6 @@
     "maxFeePerGas":"",
     "maxPriorityFeePerGas":"",
     "multiplierGas": "",
+    "setupEmptyCommittee": true,
+    "committeeTimelock": false
 }

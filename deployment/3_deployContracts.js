@@ -82,6 +82,8 @@ async function main() {
         salt,
         zkEVMDeployerAddress,
         maticTokenAddress,
+        setupEmptyCommittee,
+        committeeTimelock,
     } = deployParameters;
 
     // Load provider
@@ -215,8 +217,13 @@ async function main() {
         initializeEmptyDataProxy,
     )).data;
 
-    // Nonce globalExitRoot: currentNonce + 1 (deploy bridge proxy) + 1(impl globalExitRoot) = +2
-    const nonceProxyGlobalExitRoot = Number((await ethers.provider.getTransactionCount(deployer.address))) + 2;
+    /*
+     * Nonce globalExitRoot: currentNonce + 1 (deploy bridge proxy) + 1(impl globalExitRoot
+     * + 1 (deploy data comittee proxy) + 1(impl data committee) + setupCommitte? = +4 or +5
+     */
+    const nonceDelta = 4 + (setupEmptyCommittee ? 1 : 0);
+    const nonceProxyGlobalExitRoot = Number((await ethers.provider.getTransactionCount(deployer.address)))
+        + nonceDelta;
     // nonceProxyZkevm :Nonce globalExitRoot + 1 (proxy globalExitRoot) + 1 (impl Zkevm) = +2
     const nonceProxyZkevm = nonceProxyGlobalExitRoot + 2;
 
@@ -276,6 +283,41 @@ async function main() {
 
     // Import OZ manifest the deployed contracts, its enough to import just the proxy, the rest are imported automatically (admin/impl)
     await upgrades.forceImport(proxyBridgeAddress, polygonZkEVMBridgeFactory, 'transparent');
+
+    /*
+     * Deployment Data Committee
+     */
+    let dataCommitteeContract;
+    const dataCommitteeContractFactory = await ethers.getContractFactory('DataCommittee', deployer);
+    for (let i = 0; i < attemptsDeployProxy; i++) {
+        try {
+            dataCommitteeContract = await upgrades.deployProxy(
+                dataCommitteeContractFactory,
+                [],
+            );
+            break;
+        } catch (error) {
+            console.log(`attempt ${i}`);
+            console.log('upgrades.deployProxy of dataCommitteeContract ', error.message);
+        }
+
+        // reach limits of attempts
+        if (i + 1 === attemptsDeployProxy) {
+            throw new Error('dataCommitteeContract contract has not been deployed');
+        }
+    }
+
+    console.log('#######################\n');
+    console.log('dataCommittee deployed to:', dataCommitteeContract.address);
+
+    if (setupEmptyCommittee) {
+        const expectedHash = ethers.utils.solidityKeccak256(['bytes'], [[]]);
+        await expect(dataCommitteeContract.connect(deployer)
+            .setupCommittee(0, [], []))
+            .to.emit(dataCommitteeContract, 'CommitteeUpdated')
+            .withArgs(expectedHash);
+        console.log('Empty committee seted up');
+    }
 
     /*
      *Deployment Global exit root manager
@@ -379,6 +421,7 @@ async function main() {
                             maticTokenAddress,
                             verifierContract.address,
                             polygonZkEVMBridgeContract.address,
+                            dataCommitteeContract.address,
                             chainID,
                             forkID,
                         ],
@@ -504,6 +547,10 @@ async function main() {
         await upgrades.admin.transferProxyAdminOwnership(timelockContract.address);
     }
 
+    if (committeeTimelock) {
+        await (await dataCommitteeContract.transferOwnership(timelockContract.address)).wait();
+    }
+
     console.log('\n#######################');
     console.log('#####  Checks TimelockContract  #####');
     console.log('#######################');
@@ -514,6 +561,7 @@ async function main() {
         polygonZkEVMAddress: polygonZkEVMContract.address,
         polygonZkEVMBridgeAddress: polygonZkEVMBridgeContract.address,
         polygonZkEVMGlobalExitRootAddress: polygonZkEVMGlobalExitRoot.address,
+        dataCommitteeContract: dataCommitteeContract.address,
         maticTokenAddress,
         verifierAddress: verifierContract.address,
         zkEVMDeployerContract: zkEVMDeployerContract.address,

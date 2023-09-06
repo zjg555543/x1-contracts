@@ -83,9 +83,11 @@ describe('Polygon ZK-EVM', () => {
         }
 
         const nonceProxyBridge = Number((await ethers.provider.getTransactionCount(deployer.address))) + (firstDeployment ? 3 : 2);
+        const nonceProxyCommittee = nonceProxyBridge + (firstDeployment ? 2 : 1);
         const nonceProxyZkevm = nonceProxyBridge + 2; // Always have to redeploy impl since the polygonZkEVMGlobalExitRoot address changes
 
         const precalculateBridgeAddress = ethers.utils.getContractAddress({ from: deployer.address, nonce: nonceProxyBridge });
+        const precalculateCommitteeAddress = ethers.utils.getContractAddress({ from: deployer.address, nonce: nonceProxyCommittee });
         const precalculateZkevmAddress = ethers.utils.getContractAddress({ from: deployer.address, nonce: nonceProxyZkevm });
         firstDeployment = false;
 
@@ -100,6 +102,13 @@ describe('Polygon ZK-EVM', () => {
         const polygonZkEVMBridgeFactory = await ethers.getContractFactory('PolygonZkEVMBridge');
         polygonZkEVMBridgeContract = await upgrades.deployProxy(polygonZkEVMBridgeFactory, [], { initializer: false });
 
+        // deploy CDKDataCommittee
+        const dataCommitteeFactory = await ethers.getContractFactory('DataCommittee');
+        dataCommitteeContract = await upgrades.deployProxy(
+            dataCommitteeFactory,
+            [],
+            { initializer: false },
+        );
         // deploy PolygonZkEVMMock
         const PolygonZkEVMFactory = await ethers.getContractFactory('PolygonZkEVMMock');
         polygonZkEVMContract = await upgrades.deployProxy(PolygonZkEVMFactory, [], {
@@ -109,6 +118,7 @@ describe('Polygon ZK-EVM', () => {
                 maticTokenContract.address,
                 verifierContract.address,
                 polygonZkEVMBridgeContract.address,
+                dataCommitteeContract.address,
                 chainID,
                 0,
             ],
@@ -116,6 +126,7 @@ describe('Polygon ZK-EVM', () => {
         });
 
         expect(precalculateBridgeAddress).to.be.equal(polygonZkEVMBridgeContract.address);
+        expect(precalculateCommitteeAddress).to.be.equal(cdkDataCommitteeContract.address);
         expect(precalculateZkevmAddress).to.be.equal(polygonZkEVMContract.address);
 
         await polygonZkEVMBridgeContract.initialize(networkIDMainnet, polygonZkEVMGlobalExitRoot.address, polygonZkEVMContract.address);
