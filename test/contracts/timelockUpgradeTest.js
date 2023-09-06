@@ -102,7 +102,7 @@ describe('Polygon ZK-EVM', () => {
         const polygonZkEVMBridgeFactory = await ethers.getContractFactory('PolygonZkEVMBridge');
         polygonZkEVMBridgeContract = await upgrades.deployProxy(polygonZkEVMBridgeFactory, [], { initializer: false });
 
-        // deploy CDKDataCommittee
+        // deploy DataCommittee
         const dataCommitteeFactory = await ethers.getContractFactory('DataCommittee');
         dataCommitteeContract = await upgrades.deployProxy(
             dataCommitteeFactory,
@@ -126,7 +126,7 @@ describe('Polygon ZK-EVM', () => {
         });
 
         expect(precalculateBridgeAddress).to.be.equal(polygonZkEVMBridgeContract.address);
-        expect(precalculateCommitteeAddress).to.be.equal(cdkDataCommitteeContract.address);
+        expect(precalculateCommitteeAddress).to.be.equal(dataCommitteeContract.address);
         expect(precalculateZkevmAddress).to.be.equal(polygonZkEVMContract.address);
 
         await polygonZkEVMBridgeContract.initialize(networkIDMainnet, polygonZkEVMGlobalExitRoot.address, polygonZkEVMContract.address);

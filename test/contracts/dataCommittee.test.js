@@ -14,8 +14,8 @@ describe('Polygon Data Committee', () => {
 
     let verifierContract;
     let PolygonZkEVMBridgeContract;
-    let cdkValidiumContract;
-    let cdkDataCommitteeContract;
+    let validiumContract;
+    let dataCommitteeContract;
     let maticTokenContract;
     let PolygonZkEVMGlobalExitRoot;
 
@@ -26,9 +26,9 @@ describe('Polygon Data Committee', () => {
     const genesisRoot = '0x0000000000000000000000000000000000000000000000000000000000000001';
 
     const networkIDMainnet = 0;
-    const urlSequencer = 'http://cdk-validium-json-rpc:8123';
+    const urlSequencer = 'http://zkevm-json-rpc:8123';
     const chainID = 1000;
-    const networkName = 'cdk-validium';
+    const networkName = 'validium';
     const version = '0.0.1';
     const forkID = 0;
     const pendingStateTimeoutDefault = 100;
@@ -87,8 +87,8 @@ describe('Polygon Data Committee', () => {
     }
 
     async function calculateLastAccInputHash(sequences) {
-        const lastBatchSequenced = await cdkValidiumContract.lastBatchSequenced();
-        let currentAccInputHash = (await cdkValidiumContract.sequencedBatches(lastBatchSequenced)).accInputHash;
+        const lastBatchSequenced = await validiumContract.lastBatchSequenced();
+        let currentAccInputHash = (await validiumContract.sequencedBatches(lastBatchSequenced)).accInputHash;
         for (let i = 0; i < sequences.length; i++) {
             currentAccInputHash = calculateAccInputHash(
                 currentAccInputHash,
@@ -133,25 +133,25 @@ describe('Polygon Data Committee', () => {
         );
         await maticTokenContract.deployed();
 
-        // deploy CDKDataCommittee
-        const cdkDataCommitteeFactory = await ethers.getContractFactory('CDKDataCommittee');
-        cdkDataCommitteeContract = await upgrades.deployProxy(
-            cdkDataCommitteeFactory,
+        // deploy DataCommittee
+        const dataCommitteeFactory = await ethers.getContractFactory('DataCommittee');
+        dataCommitteeContract = await upgrades.deployProxy(
+            dataCommitteeFactory,
             [],
             { initializer: false },
         );
 
         const nonceProxyBridge = Number((await ethers.provider.getTransactionCount(deployer.address))) + 2;
         // Always have to redeploy impl since the PolygonZkEVMGlobalExitRoot address changes
-        const nonceProxyCDKValidium = nonceProxyBridge + 2;
+        const nonceProxyValidium = nonceProxyBridge + 2;
 
         const precalculateBridgeAddress = ethers.utils.getContractAddress({ from: deployer.address, nonce: nonceProxyBridge });
-        const precalculateCDKValidiumAddress = ethers.utils.getContractAddress({ from: deployer.address, nonce: nonceProxyCDKValidium });
+        const precalculateValidiumAddress = ethers.utils.getContractAddress({ from: deployer.address, nonce: nonceProxyValidium });
 
         const PolygonZkEVMGlobalExitRootFactory = await ethers.getContractFactory('PolygonZkEVMGlobalExitRoot');
         PolygonZkEVMGlobalExitRoot = await upgrades.deployProxy(PolygonZkEVMGlobalExitRootFactory, [], {
             initializer: false,
-            constructorArgs: [precalculateCDKValidiumAddress, precalculateBridgeAddress],
+            constructorArgs: [precalculateValidiumAddress, precalculateBridgeAddress],
             unsafeAllow: ['constructor', 'state-variable-immutable'],
         });
 
@@ -159,16 +159,16 @@ describe('Polygon Data Committee', () => {
         const PolygonZkEVMBridgeFactory = await ethers.getContractFactory('PolygonZkEVMBridge');
         PolygonZkEVMBridgeContract = await upgrades.deployProxy(PolygonZkEVMBridgeFactory, [], { initializer: false });
 
-        // deploy CDKValidiumMock
-        const CDKValidiumFactory = await ethers.getContractFactory('CDKValidiumMock');
-        cdkValidiumContract = await upgrades.deployProxy(CDKValidiumFactory, [], {
+        // deploy ValidiumMock
+        const ValidiumFactory = await ethers.getContractFactory('ValidiumMock');
+        validiumContract = await upgrades.deployProxy(ValidiumFactory, [], {
             initializer: false,
             constructorArgs: [
                 PolygonZkEVMGlobalExitRoot.address,
                 maticTokenContract.address,
                 verifierContract.address,
                 PolygonZkEVMBridgeContract.address,
-                cdkDataCommitteeContract.address,
+                dataCommitteeContract.address,
                 chainID,
                 forkID,
             ],
@@ -176,10 +176,10 @@ describe('Polygon Data Committee', () => {
         });
 
         expect(precalculateBridgeAddress).to.be.equal(PolygonZkEVMBridgeContract.address);
-        expect(precalculateCDKValidiumAddress).to.be.equal(cdkValidiumContract.address);
+        expect(precalculateValidiumAddress).to.be.equal(validiumContract.address);
 
-        await PolygonZkEVMBridgeContract.initialize(networkIDMainnet, PolygonZkEVMGlobalExitRoot.address, cdkValidiumContract.address);
-        await cdkValidiumContract.initialize(
+        await PolygonZkEVMBridgeContract.initialize(networkIDMainnet, PolygonZkEVMGlobalExitRoot.address, validiumContract.address);
+        await validiumContract.initialize(
             {
                 admin: admin.address,
                 trustedSequencer: trustedSequencer.address,
@@ -198,19 +198,19 @@ describe('Polygon Data Committee', () => {
         // setup committee
         const { urls, addrsBytes } = membersToURLsAndAddrsBytes(committeeMembers);
         const expectedHash = ethers.utils.solidityKeccak256(['bytes'], [addrsBytes]);
-        await cdkDataCommitteeContract.initialize();
-        await expect(cdkDataCommitteeContract.connect(deployer)
+        await dataCommitteeContract.initialize();
+        await expect(dataCommitteeContract.connect(deployer)
             .setupCommittee(requiredAmountOfSignatures, urls, addrsBytes))
-            .to.emit(cdkDataCommitteeContract, 'CommitteeUpdated')
+            .to.emit(dataCommitteeContract, 'CommitteeUpdated')
             .withArgs(expectedHash);
-        const actualAmountOfmembers = await cdkDataCommitteeContract.getAmountOfMembers();
+        const actualAmountOfmembers = await dataCommitteeContract.getAmountOfMembers();
         expect(actualAmountOfmembers).to.be.equal(committeeMembers.length);
     });
 
     // SETUP COMMITTEE tests
     it('fail because required amount of signatures is greater than members', async () => {
         const { urls, addrsBytes } = membersToURLsAndAddrsBytes(committeeMembers);
-        await expect(cdkDataCommitteeContract.connect(deployer)
+        await expect(dataCommitteeContract.connect(deployer)
             .setupCommittee(nMembers + 1, urls, addrsBytes))
             .to.be.revertedWith('TooManyRequiredSignatures');
     });
@@ -224,7 +224,7 @@ describe('Polygon Data Committee', () => {
             addr: '0x2d630a3ac2b39472958507d73e3e450acde3431c',
         }];
         const { urls, addrsBytes } = membersToURLsAndAddrsBytes(wrongAddressOrderMembers);
-        await expect(cdkDataCommitteeContract.connect(deployer)
+        await expect(dataCommitteeContract.connect(deployer)
             .setupCommittee(1, urls, addrsBytes))
             .to.be.revertedWith('WrongAddrOrder');
     });
@@ -238,7 +238,7 @@ describe('Polygon Data Committee', () => {
             addr: '0x2d630a3ac2b39472958507d73e3e450acde3431c',
         }];
         const { urls, addrsBytes } = membersToURLsAndAddrsBytes(wrongAddressOrderMembers);
-        await expect(cdkDataCommitteeContract.connect(deployer)
+        await expect(dataCommitteeContract.connect(deployer)
             .setupCommittee(1, urls, addrsBytes))
             .to.be.revertedWith('WrongAddrOrder');
     });
@@ -252,7 +252,7 @@ describe('Polygon Data Committee', () => {
             addr: '0x2d630a3ac2b39472958507d73e3e450acde3431c',
         }];
         const { urls, addrsBytes } = membersToURLsAndAddrsBytes(wrongAddressOrderMembers);
-        await expect(cdkDataCommitteeContract.connect(deployer)
+        await expect(dataCommitteeContract.connect(deployer)
             .setupCommittee(1, urls, addrsBytes))
             .to.be.revertedWith('WrongAddrOrder');
     });
@@ -266,7 +266,7 @@ describe('Polygon Data Committee', () => {
             addr: '0x341f33e89ec1f28b9d5618413c223f973426140b',
         }];
         const { urls, addrsBytes } = membersToURLsAndAddrsBytes(wrongAddressOrderMembers);
-        await expect(cdkDataCommitteeContract.connect(deployer)
+        await expect(dataCommitteeContract.connect(deployer)
             .setupCommittee(1, urls, addrsBytes))
             .to.be.revertedWith('EmptyURLNotAllowed');
     });
@@ -280,10 +280,10 @@ describe('Polygon Data Committee', () => {
             addr: '0x341f33e89ec1f28b9d5618413c223f973426140b',
         }];
         const { urls, addrsBytes } = membersToURLsAndAddrsBytes(wrongAddressOrderMembers);
-        await expect(cdkDataCommitteeContract.connect(deployer)
+        await expect(dataCommitteeContract.connect(deployer)
             .setupCommittee(1, urls, addrsBytes.substring(0, addrsBytes.length - 2)))
             .to.be.revertedWith('UnexpectedAddrsBytesLength');
-        await expect(cdkDataCommitteeContract.connect(deployer)
+        await expect(dataCommitteeContract.connect(deployer)
             .setupCommittee(1, urls, `${addrsBytes}ff`))
             .to.be.revertedWith('UnexpectedAddrsBytesLength');
     });
@@ -306,19 +306,19 @@ describe('Polygon Data Committee', () => {
 
         // Remove last byte
         const withMissingByte = signaturesAndAddrs.substring(0, signaturesAndAddrs.length - 2);
-        await expect(cdkValidiumContract.connect(trustedSequencer)
+        await expect(validiumContract.connect(trustedSequencer)
             .sequenceBatches([sequence], deployer.address, withMissingByte))
             .to.be.revertedWith('UnexpectedAddrsAndSignaturesSize');
 
         // Add extra byte
         const withExtraByte = `${signaturesAndAddrs.substring(0, signaturesAndAddrs.length)}11`;
-        await expect(cdkValidiumContract.connect(trustedSequencer)
+        await expect(validiumContract.connect(trustedSequencer)
             .sequenceBatches([sequence], deployer.address, withExtraByte))
             .to.be.revertedWith('UnexpectedAddrsAndSignaturesSize');
 
         // Add extra bytes that matches with address length (20 bytes) will fail to match the hash
         const extra20Bytes = '690b9a9e9aa1c9db991c7721a92d351db4fac990';
-        await expect(cdkValidiumContract.connect(trustedSequencer)
+        await expect(validiumContract.connect(trustedSequencer)
             .sequenceBatches([sequence], deployer.address, signaturesAndAddrs + extra20Bytes))
             .to.be.revertedWith('UnexpectedCommitteeHash');
     });
@@ -340,7 +340,7 @@ describe('Polygon Data Committee', () => {
 
         // Change half byte of the address list, so the hash doesn't match
         const withLastHalfByteSwapped = `${signaturesAndAddrs.substring(0, signaturesAndAddrs.length - 1)}a`;
-        await expect(cdkValidiumContract.connect(trustedSequencer)
+        await expect(validiumContract.connect(trustedSequencer)
             .sequenceBatches([sequence], deployer.address, withLastHalfByteSwapped))
             .to.be.revertedWith('UnexpectedCommitteeHash');
     });
@@ -364,7 +364,7 @@ describe('Polygon Data Committee', () => {
         const addressNotFromTheCommittee = '690b9a9e9aa1c9db991c7721a92d351db4fac990';
         const withWrongAddr = signaturesAndAddrs.substring(0, signaturesAndAddrs.length - 40)
             + addressNotFromTheCommittee;
-        await expect(cdkValidiumContract.connect(trustedSequencer)
+        await expect(validiumContract.connect(trustedSequencer)
             .sequenceBatches([sequence], deployer.address, withWrongAddr))
             .to.be.revertedWith('UnexpectedCommitteeHash');
     });
@@ -391,7 +391,7 @@ describe('Polygon Data Committee', () => {
         );
         const withWrongAddr = signaturesAndAddrs.substring(0, signaturesAndAddrs.length - 80)
             + repeatedAddr + repeatedAddr;
-        await expect(cdkValidiumContract.connect(trustedSequencer)
+        await expect(validiumContract.connect(trustedSequencer)
             .sequenceBatches([sequence], deployer.address, withWrongAddr))
             .to.be.revertedWith('UnexpectedCommitteeHash');
     });
@@ -413,7 +413,7 @@ describe('Polygon Data Committee', () => {
 
         // Replace last address
         const withWrongSignature = `0x1${signaturesAndAddrs.slice(3)}`;
-        await expect(cdkValidiumContract.connect(trustedSequencer)
+        await expect(validiumContract.connect(trustedSequencer)
             .sequenceBatches([sequence], deployer.address, withWrongSignature))
             .to.be.revertedWith('CommitteeAddressDoesntExist');
     });
@@ -441,7 +441,7 @@ describe('Polygon Data Committee', () => {
         const withRepeatedSignature = `0x${repeatedSignature}${repeatedSignature
         }${withoutZeroXAndTwoFirstSignatures}`;
 
-        await expect(cdkValidiumContract.connect(trustedSequencer)
+        await expect(validiumContract.connect(trustedSequencer)
             .sequenceBatches([sequence], deployer.address, withRepeatedSignature))
             .to.be.revertedWith('CommitteeAddressDoesntExist');
     });
@@ -449,7 +449,7 @@ describe('Polygon Data Committee', () => {
     it('success single batch', async () => {
         const l2txData = '0x123456';
         const transactionsHash = calculateBatchHashData(l2txData);
-        const maticAmount = await cdkValidiumContract.batchFee();
+        const maticAmount = await validiumContract.batchFee();
         const currentTimestamp = (await ethers.provider.getBlock()).timestamp;
 
         const sequence = {
@@ -461,7 +461,7 @@ describe('Polygon Data Committee', () => {
 
         // Approve tokens
         await expect(
-            maticTokenContract.connect(trustedSequencer).approve(cdkValidiumContract.address, maticAmount),
+            maticTokenContract.connect(trustedSequencer).approve(validiumContract.address, maticAmount),
         ).to.emit(maticTokenContract, 'Approval');
 
         // Sign committee data
@@ -469,10 +469,10 @@ describe('Polygon Data Committee', () => {
         const signaturesAndAddrs = genSignaturesAndAddrs(hashToSign);
 
         // Send sequence successfully
-        const lastBatchSequenced = await cdkValidiumContract.lastBatchSequenced();
-        await expect(cdkValidiumContract.connect(trustedSequencer)
+        const lastBatchSequenced = await validiumContract.lastBatchSequenced();
+        await expect(validiumContract.connect(trustedSequencer)
             .sequenceBatches([sequence], deployer.address, signaturesAndAddrs))
-            .to.emit(cdkValidiumContract, 'SequenceBatches')
+            .to.emit(validiumContract, 'SequenceBatches')
             .withArgs(lastBatchSequenced + 1);
     });
 
@@ -498,9 +498,9 @@ describe('Polygon Data Committee', () => {
         };
 
         // Approve tokens
-        const maticAmount = (await cdkValidiumContract.batchFee()).mul(2);
+        const maticAmount = (await validiumContract.batchFee()).mul(2);
         await expect(
-            maticTokenContract.connect(trustedSequencer).approve(cdkValidiumContract.address, maticAmount),
+            maticTokenContract.connect(trustedSequencer).approve(validiumContract.address, maticAmount),
         ).to.emit(maticTokenContract, 'Approval');
 
         // Sign committee data
@@ -508,39 +508,39 @@ describe('Polygon Data Committee', () => {
         const signaturesAndAddrs = genSignaturesAndAddrs(hashToSign);
 
         // Send sequence successfully
-        const lastBatchSequenced = await cdkValidiumContract.lastBatchSequenced();
-        await expect(cdkValidiumContract.connect(trustedSequencer)
+        const lastBatchSequenced = await validiumContract.lastBatchSequenced();
+        await expect(validiumContract.connect(trustedSequencer)
             .sequenceBatches([sequence1, sequence2], deployer.address, signaturesAndAddrs))
-            .to.emit(cdkValidiumContract, 'SequenceBatches')
+            .to.emit(validiumContract, 'SequenceBatches')
             .withArgs(lastBatchSequenced + 2);
     });
 
     it('success forced batch', async () => {
         const l2txDataForceBatch = '0x123456';
         const transactionsHashForceBatch = calculateBatchHashData(l2txDataForceBatch);
-        const maticAmount = await cdkValidiumContract.getForcedBatchFee();
+        const maticAmount = await validiumContract.getForcedBatchFee();
         const lastGlobalExitRoot = await PolygonZkEVMGlobalExitRoot.getLastGlobalExitRoot();
 
         await expect(
-            maticTokenContract.approve(cdkValidiumContract.address, maticAmount),
+            maticTokenContract.approve(validiumContract.address, maticAmount),
         ).to.emit(maticTokenContract, 'Approval');
 
-        const lastForcedBatch = (await cdkValidiumContract.lastForceBatch()) + 1;
+        const lastForcedBatch = (await validiumContract.lastForceBatch()) + 1;
 
         // Activate forced batches
         await expect(
-            cdkValidiumContract.connect(admin).activateForceBatches(),
-        ).to.emit(cdkValidiumContract, 'ActivateForceBatches');
+            validiumContract.connect(admin).activateForceBatches(),
+        ).to.emit(validiumContract, 'ActivateForceBatches');
 
         // Force batch
-        await expect(cdkValidiumContract.forceBatch(l2txDataForceBatch, maticAmount))
-            .to.emit(cdkValidiumContract, 'ForceBatch')
+        await expect(validiumContract.forceBatch(l2txDataForceBatch, maticAmount))
+            .to.emit(validiumContract, 'ForceBatch')
             .withArgs(lastForcedBatch, lastGlobalExitRoot, deployer.address, '0x');
 
         // sequence 2 batches
         const l2txData = '0x1234';
         const transactionsHash2 = calculateBatchHashData(l2txData);
-        const maticAmountSequence = (await cdkValidiumContract.batchFee()).mul(1);
+        const maticAmountSequence = (await validiumContract.batchFee()).mul(1);
 
         const currentTimestamp = (await ethers.provider.getBlock()).timestamp;
 
@@ -564,30 +564,30 @@ describe('Polygon Data Committee', () => {
 
         // Approve tokens
         await expect(
-            maticTokenContract.connect(trustedSequencer).approve(cdkValidiumContract.address, maticAmountSequence),
+            maticTokenContract.connect(trustedSequencer).approve(validiumContract.address, maticAmountSequence),
         ).to.emit(maticTokenContract, 'Approval');
 
-        const lastBatchSequenced = await cdkValidiumContract.lastBatchSequenced();
+        const lastBatchSequenced = await validiumContract.lastBatchSequenced();
 
         // Assert that the timestamp requirements must accomplish with force batches too
 
         sequence1.minForcedTimestamp += 1;
-        await expect(cdkValidiumContract.connect(trustedSequencer).sequenceBatches([sequence1, sequence2], trustedSequencer.address, []))
+        await expect(validiumContract.connect(trustedSequencer).sequenceBatches([sequence1, sequence2], trustedSequencer.address, []))
             .to.be.revertedWith('ForcedDataDoesNotMatch');
         sequence1.minForcedTimestamp -= 1;
 
         sequence1.timestamp -= 1;
-        await expect(cdkValidiumContract.connect(trustedSequencer).sequenceBatches([sequence1, sequence2], trustedSequencer.address, []))
+        await expect(validiumContract.connect(trustedSequencer).sequenceBatches([sequence1, sequence2], trustedSequencer.address, []))
             .to.be.revertedWith('SequencedTimestampBelowForcedTimestamp');
         sequence1.timestamp += 1;
 
         sequence1.timestamp = currentTimestamp + 10;
-        await expect(cdkValidiumContract.connect(trustedSequencer).sequenceBatches([sequence1, sequence2], trustedSequencer.address, []))
+        await expect(validiumContract.connect(trustedSequencer).sequenceBatches([sequence1, sequence2], trustedSequencer.address, []))
             .to.be.revertedWith('SequencedTimestampInvalid');
         sequence1.timestamp = currentTimestamp;
 
         sequence2.timestamp -= 1;
-        await expect(cdkValidiumContract.connect(trustedSequencer).sequenceBatches([sequence1, sequence2], trustedSequencer.address, []))
+        await expect(validiumContract.connect(trustedSequencer).sequenceBatches([sequence1, sequence2], trustedSequencer.address, []))
             .to.be.revertedWith('SequencedTimestampInvalid');
         sequence2.timestamp += 1;
 
@@ -610,9 +610,9 @@ describe('Polygon Data Committee', () => {
             trustedSequencer.address,
         );
         const signaturesAndAddrs = genSignaturesAndAddrs(batchAccInputHashJs);
-        await expect(cdkValidiumContract.connect(trustedSequencer)
+        await expect(validiumContract.connect(trustedSequencer)
             .sequenceBatches([sequence1, sequence2], trustedSequencer.address, signaturesAndAddrs))
-            .to.emit(cdkValidiumContract, 'SequenceBatches')
+            .to.emit(validiumContract, 'SequenceBatches')
             .withArgs(Number(lastBatchSequenced) + 2);
 
         const sequencedTimestamp = (await ethers.provider.getBlock()).timestamp;
@@ -626,11 +626,11 @@ describe('Polygon Data Committee', () => {
         );
 
         // Check batch mapping
-        const batchAccInputHash = (await cdkValidiumContract.sequencedBatches(1)).accInputHash;
+        const batchAccInputHash = (await validiumContract.sequencedBatches(1)).accInputHash;
         // Only last batch is added to the mapping
         expect(batchAccInputHash).to.be.equal(ethers.constants.HashZero);
 
-        const batchData2 = await cdkValidiumContract.sequencedBatches(2);
+        const batchData2 = await validiumContract.sequencedBatches(2);
         expect(batchData2.accInputHash).to.be.equal(batchAccInputHashJs);
         expect(batchData2.sequencedTimestamp).to.be.equal(sequencedTimestamp);
         expect(batchData2.previousLastBatchSequenced).to.be.equal(0);
