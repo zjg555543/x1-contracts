@@ -521,19 +521,17 @@ contract PolygonZkEVM is
             BatchData memory currentBatch = batches[i];
 
             // Store the current transactions hash since can be used more than once for gas saving
-            bytes32 currentTransactionsHash;
-            if (signaturesAndAddrs.length > 0){
-                if (currentBatch.transactions.length > 0){
-                    revert DacHasTransactions();
-                }
-                currentTransactionsHash = currentBatch.transactionsHash;
-            }
-            else{
-                if (currentBatch.transactions.length <= 0){
-                    revert DacHasNoTransactions();
-                }
-                currentTransactionsHash = keccak256(currentBatch.transactions);
-            }
+            // bytes32 currentTransactionsHash;
+            // if (signaturesAndAddrs.length > 0){
+            //     require(currentBatch.transactions.length == 0, "DacHasTransactions");
+            //     currentTransactionsHash = currentBatch.transactionsHash;
+            // }
+            // else{
+            //     require(currentBatch.transactions.length > 0, "DacHasNoTransactions");
+            //     currentTransactionsHash = keccak256(currentBatch.transactions);
+            // }
+
+            bytes32 currentTransactionsHash = signaturesAndAddrs.length > 0 ? currentBatch.transactionsHash : keccak256(currentBatch.transactions);
 
             // Check if it's a forced batch
             if (currentBatch.minForcedTimestamp > 0) {
