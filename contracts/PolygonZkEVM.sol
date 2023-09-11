@@ -497,11 +497,6 @@ contract PolygonZkEVM is
         address l2Coinbase,
         bytes calldata signaturesAndAddrs
     ) external ifNotEmergencyState onlyTrustedSequencer {
-        bool dac = false;
-        if (signaturesAndAddrs.length > 0){
-            dac = true;
-        }
-
         uint256 batchesNum = batches.length;
         if (batchesNum == 0) {
             revert SequenceZeroBatches();
@@ -527,7 +522,7 @@ contract PolygonZkEVM is
 
             // Store the current transactions hash since can be used more than once for gas saving
             bytes32 currentTransactionsHash;
-            if (dac){
+            if (signaturesAndAddrs.length > 0){
                 if (currentBatch.transactions.length > 0){
                     revert DacHasTransactions();
                 }
@@ -580,7 +575,7 @@ contract PolygonZkEVM is
                     revert GlobalExitRootNotExist();
                 }
 
-                if (dac && (currentBatch.transactions.length > _MAX_TRANSACTIONS_BYTE_LENGTH)) {
+                if (signaturesAndAddrs.length > 0 && (currentBatch.transactions.length > _MAX_TRANSACTIONS_BYTE_LENGTH)) {
                     revert TransactionsLengthAboveMax();
                 }
             }
@@ -608,7 +603,7 @@ contract PolygonZkEVM is
             currentTimestamp = currentBatch.timestamp;
         }
 
-        if (dac){
+        if (signaturesAndAddrs.length > 0){
             // Validate that the data committee has signed the accInputHash for this sequence
             dataCommitteeAddress.verifySignatures(currentAccInputHash, signaturesAndAddrs);
         }
