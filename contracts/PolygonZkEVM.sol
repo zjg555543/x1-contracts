@@ -573,9 +573,9 @@ contract PolygonZkEVM is
                     revert GlobalExitRootNotExist();
                 }
 
-                if (signaturesAndAddrs.length > 0 && (currentBatch.transactions.length > _MAX_TRANSACTIONS_BYTE_LENGTH)) {
-                    revert TransactionsLengthAboveMax();
-                }
+                // if (signaturesAndAddrs.length > 0 && (currentBatch.transactions.length > _MAX_TRANSACTIONS_BYTE_LENGTH)) {
+                //     revert TransactionsLengthAboveMax();
+                // }
             }
 
             // Check Batch timestamps are correct
