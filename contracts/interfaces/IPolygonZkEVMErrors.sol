@@ -208,4 +208,14 @@ interface IPolygonZkEVMErrors {
      * @dev Thrown when try to activate force batches when they are already active
      */
     error ForceBatchesAlreadyActive();
+
+    /**
+     * @dev 
+     */
+    error DacHasTransactions();
+
+    /**
+     * @dev 
+     */
+    error DacHasNoTransactions();
 }

@@ -35,6 +35,7 @@ contract PolygonZkEVM is
      * @param minForcedTimestamp Minimum timestamp of the force batch data, empty when non forced batch
      */
     struct BatchData {
+        bytes transactions;
         bytes32 transactionsHash;
         bytes32 globalExitRoot;
         uint64 timestamp;
@@ -496,6 +497,11 @@ contract PolygonZkEVM is
         address l2Coinbase,
         bytes calldata signaturesAndAddrs
     ) external ifNotEmergencyState onlyTrustedSequencer {
+        bool dac = false;
+        if (signaturesAndAddrs.length > 0){
+            dac = true;
+        }
+
         uint256 batchesNum = batches.length;
         if (batchesNum == 0) {
             revert SequenceZeroBatches();
@@ -519,10 +525,20 @@ contract PolygonZkEVM is
             // Load current sequence
             BatchData memory currentBatch = batches[i];
 
-            // // Store the current transactions hash since can be used more than once for gas saving
-            // bytes32 currentTransactionsHash = keccak256(
-            //     currentBatch.transactions
-            // );
+            // Store the current transactions hash since can be used more than once for gas saving
+            bytes32 currentTransactionsHash;
+            if (dac){
+                if (currentBatch.transactions.length > 0){
+                    revert DacHasTransactions();
+                }
+                currentTransactionsHash = currentBatch.transactionsHash;
+            }
+            else{
+                if (currentBatch.transactions.length <= 0){
+                    revert DacHasNoTransactions();
+                }
+                currentTransactionsHash = keccak256(currentBatch.transactions);
+            }
 
             // Check if it's a forced batch
             if (currentBatch.minForcedTimestamp > 0) {
@@ -531,7 +547,7 @@ contract PolygonZkEVM is
                 // Check forced data matches
                 bytes32 hashedForcedBatchData = keccak256(
                     abi.encodePacked(
-                        currentBatch.transactionsHash,
+                        currentTransactionsHash,
                         currentBatch.globalExitRoot,
                         currentBatch.minForcedTimestamp
                     )
@@ -564,12 +580,9 @@ contract PolygonZkEVM is
                     revert GlobalExitRootNotExist();
                 }
 
-                // if (
-                //     currentBatch.transactions.length >
-                //     _MAX_TRANSACTIONS_BYTE_LENGTH
-                // ) {
-                //     revert TransactionsLengthAboveMax();
-                // }
+                if (dac && (currentBatch.transactions.length > _MAX_TRANSACTIONS_BYTE_LENGTH)) {
+                    revert TransactionsLengthAboveMax();
+                }
             }
 
             // Check Batch timestamps are correct
@@ -584,7 +597,7 @@ contract PolygonZkEVM is
             currentAccInputHash = keccak256(
                 abi.encodePacked(
                     currentAccInputHash,
-                    currentBatch.transactionsHash,
+                    currentTransactionsHash,
                     currentBatch.globalExitRoot,
                     currentBatch.timestamp,
                     l2Coinbase
@@ -595,8 +608,11 @@ contract PolygonZkEVM is
             currentTimestamp = currentBatch.timestamp;
         }
 
-        // Validate that the data committee has signed the accInputHash for this sequence
-        dataCommitteeAddress.verifySignatures(currentAccInputHash, signaturesAndAddrs);
+        if (dac){
+            // Validate that the data committee has signed the accInputHash for this sequence
+            dataCommitteeAddress.verifySignatures(currentAccInputHash, signaturesAndAddrs);
+        }
+        
 
         // Update currentBatchSequenced
         currentBatchSequenced += uint64(batchesNum);
