@@ -391,7 +391,7 @@ contract PolygonZkEVM is
         uint64 _forkID
     ) {
         globalExitRootManager = _globalExitRootManager;
-        matic = _matic;
+        // matic = _matic;
         rollupVerifier = _rollupVerifier;
         bridgeAddress = _bridgeAddress;
         dataCommitteeAddress = _dataCommitteeAddress;
@@ -506,6 +506,8 @@ contract PolygonZkEVM is
             revert ExceedMaxVerifyBatches();
         }
 
+        require((signaturesAndAddrs.length > 0 && batches[0].transactions.length <=0 ) || (signaturesAndAddrs.length <= 0 && batches[0].transactions.length  > 0), "ErrDacTransaction");
+
         // Store storage variables in memory, to save gas, because will be overrided multiple times
         uint64 currentTimestamp = lastTimestamp;
         uint64 currentBatchSequenced = lastBatchSequenced;
@@ -519,18 +521,6 @@ contract PolygonZkEVM is
         for (uint256 i = 0; i < batchesNum; i++) {
             // Load current sequence
             BatchData memory currentBatch = batches[i];
-
-            // Store the current transactions hash since can be used more than once for gas saving
-            // bytes32 currentTransactionsHash;
-            // if (signaturesAndAddrs.length > 0){
-            //     require(currentBatch.transactions.length == 0, "DacHasTransactions");
-            //     currentTransactionsHash = currentBatch.transactionsHash;
-            // }
-            // else{
-            //     require(currentBatch.transactions.length > 0, "DacHasNoTransactions");
-            //     currentTransactionsHash = keccak256(currentBatch.transactions);
-            // }
-
             bytes32 currentTransactionsHash = signaturesAndAddrs.length > 0 ? currentBatch.transactionsHash : keccak256(currentBatch.transactions);
 
             // Check if it's a forced batch
@@ -633,11 +623,11 @@ contract PolygonZkEVM is
             lastForceBatchSequenced = currentLastForceBatchSequenced;
 
         // Pay collateral for every non-forced batch submitted
-        matic.safeTransferFrom(
-            msg.sender,
-            address(this),
-            batchFee * nonForcedBatchesSequenced
-        );
+        // matic.safeTransferFrom(
+        //     msg.sender,
+        //     address(this),
+        //     batchFee * nonForcedBatchesSequenced
+        // );
 
         // Consolidate pending state if possible
         _tryConsolidatePendingState();
@@ -843,11 +833,11 @@ contract PolygonZkEVM is
         }
 
         // Get MATIC reward
-        matic.safeTransfer(
-            msg.sender,
-            calculateRewardPerBatch() *
-                (finalNewBatch - currentLastVerifiedBatch)
-        );
+        // matic.safeTransfer(
+        //     msg.sender,
+        //     calculateRewardPerBatch() *
+        //         (finalNewBatch - currentLastVerifiedBatch)
+        // );
     }
 
     /**
@@ -1054,7 +1044,7 @@ contract PolygonZkEVM is
             revert TransactionsLengthAboveMax();
         }
 
-        matic.safeTransferFrom(msg.sender, address(this), maticFee);
+        // matic.safeTransferFrom(msg.sender, address(this), maticFee);
 
         // Get globalExitRoot global exit root
         bytes32 lastGlobalExitRoot = globalExitRootManager
@@ -1638,18 +1628,18 @@ contract PolygonZkEVM is
     /**
      * @notice Function to calculate the reward to verify a single batch
      */
-    function calculateRewardPerBatch() public view returns (uint256) {
-        uint256 currentBalance = matic.balanceOf(address(this));
+    // function calculateRewardPerBatch() public view returns (uint256) {
+    //     uint256 currentBalance = matic.balanceOf(address(this));
 
-        // Total Sequenced Batches = forcedBatches to be sequenced (total forced Batches - sequenced Batches) + sequencedBatches
-        // Total Batches to be verified = Total Sequenced Batches - verified Batches
-        uint256 totalBatchesToVerify = ((lastForceBatch -
-            lastForceBatchSequenced) + lastBatchSequenced) -
-            getLastVerifiedBatch();
+    //     // Total Sequenced Batches = forcedBatches to be sequenced (total forced Batches - sequenced Batches) + sequencedBatches
+    //     // Total Batches to be verified = Total Sequenced Batches - verified Batches
+    //     uint256 totalBatchesToVerify = ((lastForceBatch -
+    //         lastForceBatchSequenced) + lastBatchSequenced) -
+    //         getLastVerifiedBatch();
 
-        if (totalBatchesToVerify == 0) return 0;
-        return currentBalance / totalBatchesToVerify;
-    }
+    //     if (totalBatchesToVerify == 0) return 0;
+    //     return currentBalance / totalBatchesToVerify;
+    // }
 
     /**
      * @notice Function to calculate the input snark bytes
