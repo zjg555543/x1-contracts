@@ -391,7 +391,7 @@ contract PolygonZkEVM is
         uint64 _forkID
     ) {
         globalExitRootManager = _globalExitRootManager;
-        // matic = _matic;
+        matic = _matic;
         rollupVerifier = _rollupVerifier;
         bridgeAddress = _bridgeAddress;
         dataCommitteeAddress = _dataCommitteeAddress;
