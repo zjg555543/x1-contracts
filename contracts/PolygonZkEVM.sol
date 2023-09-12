@@ -506,7 +506,7 @@ contract PolygonZkEVM is
             revert ExceedMaxVerifyBatches();
         }
 
-        require((signaturesAndAddrs.length > 0 && batches[0].transactions.length <=0 ) || (signaturesAndAddrs.length <= 0 && batches[0].transactions.length  > 0), "ErrDacTransaction");
+        // require((signaturesAndAddrs.length > 0 && batches[0].transactions.length <=0 ) || (signaturesAndAddrs.length <= 0 && batches[0].transactions.length  > 0), "ErrDacTransaction");
 
         // Store storage variables in memory, to save gas, because will be overrided multiple times
         uint64 currentTimestamp = lastTimestamp;
