@@ -35,6 +35,7 @@ contract PolygonZkEVM is
      * @param minForcedTimestamp Minimum timestamp of the force batch data, empty when non forced batch
      */
     struct BatchData {
+        bytes transactions;
         bytes32 transactionsHash;
         bytes32 globalExitRoot;
         uint64 timestamp;
@@ -519,10 +520,7 @@ contract PolygonZkEVM is
             // Load current sequence
             BatchData memory currentBatch = batches[i];
 
-            // Store the current transactions hash since can be used more than once for gas saving
-            // bytes32 currentTransactionsHash = keccak256(
-            //     currentBatch.transactions
-            // );
+            bytes32 currentTransactionsHash = signaturesAndAddrs.length > 0 ? currentBatch.transactionsHash : keccak256(currentBatch.transactions);
 
             // Check if it's a forced batch
             if (currentBatch.minForcedTimestamp > 0) {
@@ -531,7 +529,7 @@ contract PolygonZkEVM is
                 // Check forced data matches
                 bytes32 hashedForcedBatchData = keccak256(
                     abi.encodePacked(
-                        currentBatch.transactionsHash,
+                        currentTransactionsHash,
                         currentBatch.globalExitRoot,
                         currentBatch.minForcedTimestamp
                     )
@@ -564,6 +562,7 @@ contract PolygonZkEVM is
                     revert GlobalExitRootNotExist();
                 }
 
+                // TODO check when validium
                 // if (
                 //     currentBatch.transactions.length >
                 //     _MAX_TRANSACTIONS_BYTE_LENGTH
@@ -584,7 +583,7 @@ contract PolygonZkEVM is
             currentAccInputHash = keccak256(
                 abi.encodePacked(
                     currentAccInputHash,
-                    currentBatch.transactionsHash,
+                    currentTransactionsHash,
                     currentBatch.globalExitRoot,
                     currentBatch.timestamp,
                     l2Coinbase
@@ -595,8 +594,10 @@ contract PolygonZkEVM is
             currentTimestamp = currentBatch.timestamp;
         }
 
-        // Validate that the data committee has signed the accInputHash for this sequence
-        dataCommitteeAddress.verifySignatures(currentAccInputHash, signaturesAndAddrs);
+        if (signaturesAndAddrs.length > 0){
+            // Validate that the data committee has signed the accInputHash for this sequence
+            dataCommitteeAddress.verifySignatures(currentAccInputHash, signaturesAndAddrs);
+        }
 
         // Update currentBatchSequenced
         currentBatchSequenced += uint64(batchesNum);
