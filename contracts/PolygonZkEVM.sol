@@ -562,13 +562,12 @@ contract PolygonZkEVM is
                     revert GlobalExitRootNotExist();
                 }
 
-                // TODO check when validium
-                // if (
-                //     currentBatch.transactions.length >
-                //     _MAX_TRANSACTIONS_BYTE_LENGTH
-                // ) {
-                //     revert TransactionsLengthAboveMax();
-                // }
+                if (
+                    currentBatch.transactions.length >
+                    _MAX_TRANSACTIONS_BYTE_LENGTH
+                ) {
+                    revert TransactionsLengthAboveMax();
+                }
             }
 
             // Check Batch timestamps are correct
