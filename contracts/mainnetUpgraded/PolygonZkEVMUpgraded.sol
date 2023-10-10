@@ -29,6 +29,7 @@ contract PolygonZkEVMUpgraded is PolygonZkEVM {
         IERC20Upgradeable _matic,
         IVerifierRollup _rollupVerifier,
         IPolygonZkEVMBridge _bridgeAddress,
+        IDataCommittee _dataComiteeAddress,
         uint64 _chainID,
         uint64 _forkID,
         uint256 versionBeforeUpgrade
@@ -38,6 +39,7 @@ contract PolygonZkEVMUpgraded is PolygonZkEVM {
             _matic,
             _rollupVerifier,
             _bridgeAddress,
+            _dataComiteeAddress,
             _chainID,
             _forkID
         )

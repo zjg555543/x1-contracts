@@ -22,5 +22,7 @@
     "deployerPvtKey": "",
     "maxFeePerGas":"",
     "maxPriorityFeePerGas":"",
-    "multiplierGas": ""
+    "multiplierGas": "",
+    "setupEmptyCommittee": true,
+    "committeeTimelock": false
 }
