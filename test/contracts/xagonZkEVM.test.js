@@ -2,7 +2,7 @@
 const { expect } = require('chai');
 const { ethers, upgrades } = require('hardhat');
 
-const { contractUtils } = require('@0xxagonhermez/zkevm-commonjs');
+const { contractUtils } = require('@okx/zkevm-commonjs');
 
 const { calculateSnarkInput, calculateAccInputHash, calculateBatchHashData } = contractUtils;
 

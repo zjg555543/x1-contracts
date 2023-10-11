@@ -21,7 +21,7 @@ const path = require('path');
 const { argv } = require('yargs');
 const {
     MemDB, ZkEVMDB, getPoseidon, processorUtils, smtUtils, Constants,
-} = require('@0xxagonhermez/zkevm-commonjs');
+} = require('@okx/zkevm-commonjs');
 const contractsXagonHermez = require('../index');
 
 // Example of use: node create-genesis.js --gen genesis-gen.json --out genesis.json

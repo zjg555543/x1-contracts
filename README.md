@@ -2,7 +2,7 @@
 
 Smart contract implementation which will be used by the xagon-hermez zkevm
 
-[![Main CI](https://github.com/0xXagonHermez/zkevm-contracts/actions/workflows/main.yml/badge.svg)](https://github.com/0xXagonHermez/zkevm-contracts/actions/workflows/main.yml)
+[![Main CI](https://github.com/okx/zkevm-contracts/actions/workflows/main.yml/badge.svg)](https://github.com/okx/zkevm-contracts/actions/workflows/main.yml)
 
 ## Note
 

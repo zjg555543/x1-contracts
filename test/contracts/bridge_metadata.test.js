@@ -1,9 +1,9 @@
 const { expect } = require('chai');
 const { ethers, upgrades } = require('hardhat');
-const MerkleTreeBridge = require('@0xxagonhermez/zkevm-commonjs').MTBridge;
+const MerkleTreeBridge = require('@okx/zkevm-commonjs').MTBridge;
 const {
     getLeafValue,
-} = require('@0xxagonhermez/zkevm-commonjs').mtBridgeUtils;
+} = require('@okx/zkevm-commonjs').mtBridgeUtils;
 
 describe('XagonZkEVMBridge Contract werid metadata', () => {
     let deployer;

@@ -4,7 +4,7 @@ const { expect } = require('chai');
 const { ethers, upgrades } = require('hardhat');
 const { Scalar } = require('ffjavascript');
 
-const { contractUtils } = require('@0xxagonhermez/zkevm-commonjs');
+const { contractUtils } = require('@okx/zkevm-commonjs');
 
 const { generateSolidityInputs } = contractUtils;
 

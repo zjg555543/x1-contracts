@@ -1,10 +1,10 @@
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
-const MerkleTreeBridge = require('@0xxagonhermez/zkevm-commonjs').MTBridge;
+const MerkleTreeBridge = require('@okx/zkevm-commonjs').MTBridge;
 const {
     verifyMerkleProof,
     getLeafValue,
-} = require('@0xxagonhermez/zkevm-commonjs').mtBridgeUtils;
+} = require('@okx/zkevm-commonjs').mtBridgeUtils;
 
 describe('Deposit Contract', () => {
     let deployer;

@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const { ethers, upgrades } = require('hardhat');
 
-const { contractUtils } = require('@0xxagonhermez/zkevm-commonjs');
+const { contractUtils } = require('@okx/zkevm-commonjs');
 
 describe('Xagon ZK-EVM snark stark input test', () => {
     let xagonZkEVMContract;
@@ -77,7 +77,7 @@ describe('Xagon ZK-EVM snark stark input test', () => {
         expect(accumulateInputHashSC).to.be.equal(expectedStarkHashExecutor);
     });
     it('Check commonjs unit test', async () => {
-        // Unit test taken from https://github.com/0xXagonHermez/zkevm-commonjs/blob/main/test/contract-utils.test.js#L16
+        // Unit test taken from https://github.com/okx/zkevm-commonjs/blob/main/test/contract-utils.test.js#L16
         const oldStateRoot = '0x2dc4db4293af236cb329700be43f08ace740a05088f8c7654736871709687e90';
         const newStateRoot = '0xbff23fc2c168c033aaac77503ce18f958e9689d5cdaebb88c5524ce5c0319de3';
         const newLocalExitRoot = '0x0000000000000000000000000000000000000000000000000000000000000000';

@@ -19,7 +19,7 @@ node -v
 DOwnload and install the zkevm-contracts repository and go to the specific commit
 
 ```bash
-git clone https://github.com/0xXagonHermez/zkevm-contracts
+git clone https://github.com/okx/zkevm-contracts
 npm i
 git checkout 7a8d0c1950cf267fb7b10be8a47506754399cd4a
 ```

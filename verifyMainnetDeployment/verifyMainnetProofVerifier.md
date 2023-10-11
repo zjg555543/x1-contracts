@@ -61,7 +61,7 @@ The version of circom should be: 2.1.5
 
 ````bash
 cd ~
-git clone https://github.com/0xXagonHermez/zkevm-prover.git
+git clone https://github.com/okx/zkevm-prover.git
 cd zkevm-prover
 git checkout 221bafe31ee6a6e23d8f2853088ac27ee71deb8a
 git submodule init
@@ -75,7 +75,7 @@ this step takes less than 5 minutes.
 
 ````bash
 cd ~
-git clone https://github.com/0xXagonHermez/zkevm-proverjs.git
+git clone https://github.com/okx/zkevm-proverjs.git
 cd zkevm-proverjs
 git checkout fbe6b37a00d87ac6e4607ab9b91f4d514f7c72c1
 npm install

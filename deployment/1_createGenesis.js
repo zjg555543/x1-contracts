@@ -12,7 +12,7 @@ process.env.MNEMONIC = argv.test ? DEFAULT_MNEMONIC : process.env.MNEMONIC;
 const { ethers, upgrades } = require('hardhat');
 const {
     MemDB, ZkEVMDB, getPoseidon, smtUtils,
-} = require('@0xxagonhermez/zkevm-commonjs');
+} = require('@okx/zkevm-commonjs');
 
 const { deployXagonZkEVMDeployer, create2Deployment, getCreate2Address } = require('./helpers/deployment-helpers');
 

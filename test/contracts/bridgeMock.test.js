@@ -1,10 +1,10 @@
 const { expect } = require('chai');
 const { ethers, upgrades } = require('hardhat');
-const MerkleTreeBridge = require('@0xxagonhermez/zkevm-commonjs').MTBridge;
+const MerkleTreeBridge = require('@okx/zkevm-commonjs').MTBridge;
 const {
     verifyMerkleProof,
     getLeafValue,
-} = require('@0xxagonhermez/zkevm-commonjs').mtBridgeUtils;
+} = require('@okx/zkevm-commonjs').mtBridgeUtils;
 
 function calculateGlobalExitRoot(mainnetExitRoot, rollupExitRoot) {
     return ethers.utils.solidityKeccak256(['bytes32', 'bytes32'], [mainnetExitRoot, rollupExitRoot]);
