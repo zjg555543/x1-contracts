@@ -121,7 +121,7 @@ async function main() {
     }
 
     // Load zkEVM deployer
-    const PolgonZKEVMDeployerFactory = await ethers.getContractFactory('PolygonZkEVMDeployer', deployer);
+    const PolgonZKEVMDeployerFactory = await ethers.getContractFactory('XagonZkEVMDeployer', deployer);
     const zkEVMDeployerContract = PolgonZKEVMDeployerFactory.attach(zkEVMDeployerAddress);
 
     // check deployer is the owner of the deployer
@@ -178,9 +178,9 @@ async function main() {
         console.log('Proxy admin was already deployed to:', proxyAdminAddress);
     }
 
-    // Deploy implementation PolygonZkEVMBridge
-    const polygonZkEVMBridgeFactory = await ethers.getContractFactory('PolygonZkEVMBridge', deployer);
-    const deployTransactionBridge = (polygonZkEVMBridgeFactory.getDeployTransaction()).data;
+    // Deploy implementation XagonZkEVMBridge
+    const xagonZkEVMBridgeFactory = await ethers.getContractFactory('XagonZkEVMBridge', deployer);
+    const deployTransactionBridge = (xagonZkEVMBridgeFactory.getDeployTransaction()).data;
     const dataCallNull = null;
     // Mandatory to override the gasLimit since the estimation with create are mess up D:
     const overrideGasLimit = ethers.BigNumber.from(5500000);
@@ -222,13 +222,13 @@ async function main() {
         precalculateZkevmAddress;
 
     // Check if the contract is already deployed
-    if (ongoingDeployment.polygonZkEVMGlobalExitRoot && ongoingDeployment.polygonZkEVMContract) {
-        precalculateGLobalExitRootAddress = ongoingDeployment.polygonZkEVMGlobalExitRoot;
-        precalculateZkevmAddress = ongoingDeployment.polygonZkEVMContract;
+    if (ongoingDeployment.xagonZkEVMGlobalExitRoot && ongoingDeployment.xagonZkEVMContract) {
+        precalculateGLobalExitRootAddress = ongoingDeployment.xagonZkEVMGlobalExitRoot;
+        precalculateZkevmAddress = ongoingDeployment.xagonZkEVMContract;
     } else {
         // If both are not deployed, it's better to deploy them both again
-        delete ongoingDeployment.polygonZkEVMGlobalExitRoot;
-        delete ongoingDeployment.polygonZkEVMContract;
+        delete ongoingDeployment.xagonZkEVMGlobalExitRoot;
+        delete ongoingDeployment.xagonZkEVMContract;
         fs.writeFileSync(pathOngoingDeploymentJson, JSON.stringify(ongoingDeployment, null, 1));
 
         // Contracts are not deployed, normal deployment
@@ -236,7 +236,7 @@ async function main() {
         precalculateZkevmAddress = ethers.utils.getContractAddress({ from: deployer.address, nonce: nonceProxyZkevm });
     }
 
-    const dataCallProxy = polygonZkEVMBridgeFactory.interface.encodeFunctionData(
+    const dataCallProxy = xagonZkEVMBridgeFactory.interface.encodeFunctionData(
         'initialize',
         [
             networkIDMainnet,
@@ -251,39 +251,39 @@ async function main() {
         dataCallProxy,
         deployer,
     );
-    const polygonZkEVMBridgeContract = polygonZkEVMBridgeFactory.attach(proxyBridgeAddress);
+    const xagonZkEVMBridgeContract = xagonZkEVMBridgeFactory.attach(proxyBridgeAddress);
 
     if (isBridgeProxyDeployed) {
         console.log('#######################\n');
-        console.log('PolygonZkEVMBridge deployed to:', polygonZkEVMBridgeContract.address);
+        console.log('XagonZkEVMBridge deployed to:', xagonZkEVMBridgeContract.address);
     } else {
         console.log('#######################\n');
-        console.log('PolygonZkEVMBridge was already deployed to:', polygonZkEVMBridgeContract.address);
+        console.log('XagonZkEVMBridge was already deployed to:', xagonZkEVMBridgeContract.address);
 
         // If it was already deployed, check that the initialized calldata matches the actual deployment
-        expect(precalculateGLobalExitRootAddress).to.be.equal(await polygonZkEVMBridgeContract.globalExitRootManager());
-        expect(precalculateZkevmAddress).to.be.equal(await polygonZkEVMBridgeContract.polygonZkEVMaddress());
+        expect(precalculateGLobalExitRootAddress).to.be.equal(await xagonZkEVMBridgeContract.globalExitRootManager());
+        expect(precalculateZkevmAddress).to.be.equal(await xagonZkEVMBridgeContract.xagonZkEVMaddress());
     }
 
     console.log('\n#######################');
-    console.log('#####    Checks PolygonZkEVMBridge   #####');
+    console.log('#####    Checks XagonZkEVMBridge   #####');
     console.log('#######################');
-    console.log('PolygonZkEVMGlobalExitRootAddress:', await polygonZkEVMBridgeContract.globalExitRootManager());
-    console.log('networkID:', await polygonZkEVMBridgeContract.networkID());
-    console.log('zkEVMaddress:', await polygonZkEVMBridgeContract.polygonZkEVMaddress());
+    console.log('XagonZkEVMGlobalExitRootAddress:', await xagonZkEVMBridgeContract.globalExitRootManager());
+    console.log('networkID:', await xagonZkEVMBridgeContract.networkID());
+    console.log('zkEVMaddress:', await xagonZkEVMBridgeContract.xagonZkEVMaddress());
 
     // Import OZ manifest the deployed contracts, its enough to import just the proxy, the rest are imported automatically (admin/impl)
-    await upgrades.forceImport(proxyBridgeAddress, polygonZkEVMBridgeFactory, 'transparent');
+    await upgrades.forceImport(proxyBridgeAddress, xagonZkEVMBridgeFactory, 'transparent');
 
     /*
      *Deployment Global exit root manager
      */
-    let polygonZkEVMGlobalExitRoot;
-    const PolygonZkEVMGlobalExitRootFactory = await ethers.getContractFactory('PolygonZkEVMGlobalExitRoot', deployer);
-    if (!ongoingDeployment.polygonZkEVMGlobalExitRoot) {
+    let xagonZkEVMGlobalExitRoot;
+    const XagonZkEVMGlobalExitRootFactory = await ethers.getContractFactory('XagonZkEVMGlobalExitRoot', deployer);
+    if (!ongoingDeployment.xagonZkEVMGlobalExitRoot) {
         for (let i = 0; i < attemptsDeployProxy; i++) {
             try {
-                polygonZkEVMGlobalExitRoot = await upgrades.deployProxy(PolygonZkEVMGlobalExitRootFactory, [], {
+                xagonZkEVMGlobalExitRoot = await upgrades.deployProxy(XagonZkEVMGlobalExitRootFactory, [], {
                     initializer: false,
                     constructorArgs: [precalculateZkevmAddress, proxyBridgeAddress],
                     unsafeAllow: ['constructor', 'state-variable-immutable'],
@@ -291,51 +291,51 @@ async function main() {
                 break;
             } catch (error) {
                 console.log(`attempt ${i}`);
-                console.log('upgrades.deployProxy of polygonZkEVMGlobalExitRoot ', error.message);
+                console.log('upgrades.deployProxy of xagonZkEVMGlobalExitRoot ', error.message);
             }
 
             // reach limits of attempts
             if (i + 1 === attemptsDeployProxy) {
-                throw new Error('polygonZkEVMGlobalExitRoot contract has not been deployed');
+                throw new Error('xagonZkEVMGlobalExitRoot contract has not been deployed');
             }
         }
 
-        expect(precalculateGLobalExitRootAddress).to.be.equal(polygonZkEVMGlobalExitRoot.address);
+        expect(precalculateGLobalExitRootAddress).to.be.equal(xagonZkEVMGlobalExitRoot.address);
 
         console.log('#######################\n');
-        console.log('polygonZkEVMGlobalExitRoot deployed to:', polygonZkEVMGlobalExitRoot.address);
+        console.log('xagonZkEVMGlobalExitRoot deployed to:', xagonZkEVMGlobalExitRoot.address);
 
         // save an ongoing deployment
-        ongoingDeployment.polygonZkEVMGlobalExitRoot = polygonZkEVMGlobalExitRoot.address;
+        ongoingDeployment.xagonZkEVMGlobalExitRoot = xagonZkEVMGlobalExitRoot.address;
         fs.writeFileSync(pathOngoingDeploymentJson, JSON.stringify(ongoingDeployment, null, 1));
     } else {
         // sanity check
-        expect(precalculateGLobalExitRootAddress).to.be.equal(polygonZkEVMGlobalExitRoot.address);
+        expect(precalculateGLobalExitRootAddress).to.be.equal(xagonZkEVMGlobalExitRoot.address);
         // Expect the precalculate address matches de onogin deployment
-        polygonZkEVMGlobalExitRoot = PolygonZkEVMGlobalExitRootFactory.attach(ongoingDeployment.polygonZkEVMGlobalExitRoot);
+        xagonZkEVMGlobalExitRoot = XagonZkEVMGlobalExitRootFactory.attach(ongoingDeployment.xagonZkEVMGlobalExitRoot);
 
         console.log('#######################\n');
-        console.log('polygonZkEVMGlobalExitRoot already deployed on: ', ongoingDeployment.polygonZkEVMGlobalExitRoot);
+        console.log('xagonZkEVMGlobalExitRoot already deployed on: ', ongoingDeployment.xagonZkEVMGlobalExitRoot);
 
         // Import OZ manifest the deployed contracts, its enough to import just the proyx, the rest are imported automatically (admin/impl)
-        await upgrades.forceImport(ongoingDeployment.polygonZkEVMGlobalExitRoot, PolygonZkEVMGlobalExitRootFactory, 'transparent');
+        await upgrades.forceImport(ongoingDeployment.xagonZkEVMGlobalExitRoot, XagonZkEVMGlobalExitRootFactory, 'transparent');
 
         // Check against current deployment
-        expect(polygonZkEVMBridgeContract.address).to.be.equal(await polygonZkEVMBridgeContract.bridgeAddress());
-        expect(precalculateZkevmAddress).to.be.equal(await polygonZkEVMBridgeContract.rollupAddress());
+        expect(xagonZkEVMBridgeContract.address).to.be.equal(await xagonZkEVMBridgeContract.bridgeAddress());
+        expect(precalculateZkevmAddress).to.be.equal(await xagonZkEVMBridgeContract.rollupAddress());
     }
 
-    // deploy PolygonZkEVMM
+    // deploy XagonZkEVMM
     const genesisRootHex = genesis.root;
 
     console.log('\n#######################');
-    console.log('##### Deployment Polygon ZK-EVM #####');
+    console.log('##### Deployment Xagon ZK-EVM #####');
     console.log('#######################');
     console.log('deployer:', deployer.address);
-    console.log('PolygonZkEVMGlobalExitRootAddress:', polygonZkEVMGlobalExitRoot.address);
+    console.log('XagonZkEVMGlobalExitRootAddress:', xagonZkEVMGlobalExitRoot.address);
     console.log('maticTokenAddress:', maticTokenAddress);
     console.log('verifierAddress:', verifierContract.address);
-    console.log('polygonZkEVMBridgeContract:', polygonZkEVMBridgeContract.address);
+    console.log('xagonZkEVMBridgeContract:', xagonZkEVMBridgeContract.address);
 
     console.log('admin:', admin);
     console.log('chainID:', chainID);
@@ -349,15 +349,15 @@ async function main() {
     console.log('networkName:', networkName);
     console.log('forkID:', forkID);
 
-    const PolygonZkEVMFactory = await ethers.getContractFactory('PolygonZkEVM', deployer);
+    const XagonZkEVMFactory = await ethers.getContractFactory('XagonZkEVM', deployer);
 
-    let polygonZkEVMContract;
+    let xagonZkEVMContract;
     let deploymentBlockNumber;
-    if (!ongoingDeployment.polygonZkEVMContract) {
+    if (!ongoingDeployment.xagonZkEVMContract) {
         for (let i = 0; i < attemptsDeployProxy; i++) {
             try {
-                polygonZkEVMContract = await upgrades.deployProxy(
-                    PolygonZkEVMFactory,
+                xagonZkEVMContract = await upgrades.deployProxy(
+                    XagonZkEVMFactory,
                     [
                         {
                             admin,
@@ -373,10 +373,10 @@ async function main() {
                     ],
                     {
                         constructorArgs: [
-                            polygonZkEVMGlobalExitRoot.address,
+                            xagonZkEVMGlobalExitRoot.address,
                             maticTokenAddress,
                             verifierContract.address,
-                            polygonZkEVMBridgeContract.address,
+                            xagonZkEVMBridgeContract.address,
                             chainID,
                             forkID,
                         ],
@@ -386,46 +386,46 @@ async function main() {
                 break;
             } catch (error) {
                 console.log(`attempt ${i}`);
-                console.log('upgrades.deployProxy of polygonZkEVMContract ', error.message);
+                console.log('upgrades.deployProxy of xagonZkEVMContract ', error.message);
             }
 
             // reach limits of attempts
             if (i + 1 === attemptsDeployProxy) {
-                throw new Error('PolygonZkEVM contract has not been deployed');
+                throw new Error('XagonZkEVM contract has not been deployed');
             }
         }
 
-        expect(precalculateZkevmAddress).to.be.equal(polygonZkEVMContract.address);
+        expect(precalculateZkevmAddress).to.be.equal(xagonZkEVMContract.address);
 
         console.log('#######################\n');
-        console.log('polygonZkEVMContract deployed to:', polygonZkEVMContract.address);
+        console.log('xagonZkEVMContract deployed to:', xagonZkEVMContract.address);
 
         // save an ongoing deployment
-        ongoingDeployment.polygonZkEVMContract = polygonZkEVMContract.address;
+        ongoingDeployment.xagonZkEVMContract = xagonZkEVMContract.address;
         fs.writeFileSync(pathOngoingDeploymentJson, JSON.stringify(ongoingDeployment, null, 1));
 
-        // Transfer ownership of polygonZkEVMContract
+        // Transfer ownership of xagonZkEVMContract
         if (zkEVMOwner !== deployer.address) {
-            await (await polygonZkEVMContract.transferOwnership(zkEVMOwner)).wait();
+            await (await xagonZkEVMContract.transferOwnership(zkEVMOwner)).wait();
         }
 
-        deploymentBlockNumber = (await polygonZkEVMContract.deployTransaction.wait()).blockNumber;
+        deploymentBlockNumber = (await xagonZkEVMContract.deployTransaction.wait()).blockNumber;
     } else {
         // Expect the precalculate address matches de onogin deployment, sanity check
-        expect(precalculateZkevmAddress).to.be.equal(ongoingDeployment.polygonZkEVMContract);
-        polygonZkEVMContract = PolygonZkEVMFactory.attach(ongoingDeployment.polygonZkEVMContract);
+        expect(precalculateZkevmAddress).to.be.equal(ongoingDeployment.xagonZkEVMContract);
+        xagonZkEVMContract = XagonZkEVMFactory.attach(ongoingDeployment.xagonZkEVMContract);
 
         console.log('#######################\n');
-        console.log('polygonZkEVMContract already deployed on: ', ongoingDeployment.polygonZkEVMContract);
+        console.log('xagonZkEVMContract already deployed on: ', ongoingDeployment.xagonZkEVMContract);
 
         // Import OZ manifest the deployed contracts, its enough to import just the proyx, the rest are imported automatically ( admin/impl)
-        await upgrades.forceImport(ongoingDeployment.polygonZkEVMContract, PolygonZkEVMFactory, 'transparent');
+        await upgrades.forceImport(ongoingDeployment.xagonZkEVMContract, XagonZkEVMFactory, 'transparent');
 
-        const zkEVMOwnerContract = await polygonZkEVMContract.owner();
+        const zkEVMOwnerContract = await xagonZkEVMContract.owner();
         if (zkEVMOwnerContract === deployer.address) {
-            // Transfer ownership of polygonZkEVMContract
+            // Transfer ownership of xagonZkEVMContract
             if (zkEVMOwner !== deployer.address) {
-                await (await polygonZkEVMContract.transferOwnership(zkEVMOwner)).wait();
+                await (await xagonZkEVMContract.transferOwnership(zkEVMOwner)).wait();
             }
         } else {
             expect(zkEVMOwner).to.be.equal(zkEVMOwnerContract);
@@ -434,25 +434,25 @@ async function main() {
     }
 
     console.log('\n#######################');
-    console.log('#####    Checks  PolygonZkEVM  #####');
+    console.log('#####    Checks  XagonZkEVM  #####');
     console.log('#######################');
-    console.log('PolygonZkEVMGlobalExitRootAddress:', await polygonZkEVMContract.globalExitRootManager());
-    console.log('maticTokenAddress:', await polygonZkEVMContract.matic());
-    console.log('verifierAddress:', await polygonZkEVMContract.rollupVerifier());
-    console.log('polygonZkEVMBridgeContract:', await polygonZkEVMContract.bridgeAddress());
+    console.log('XagonZkEVMGlobalExitRootAddress:', await xagonZkEVMContract.globalExitRootManager());
+    console.log('maticTokenAddress:', await xagonZkEVMContract.matic());
+    console.log('verifierAddress:', await xagonZkEVMContract.rollupVerifier());
+    console.log('xagonZkEVMBridgeContract:', await xagonZkEVMContract.bridgeAddress());
 
-    console.log('admin:', await polygonZkEVMContract.admin());
-    console.log('chainID:', await polygonZkEVMContract.chainID());
-    console.log('trustedSequencer:', await polygonZkEVMContract.trustedSequencer());
-    console.log('pendingStateTimeout:', await polygonZkEVMContract.pendingStateTimeout());
-    console.log('trustedAggregator:', await polygonZkEVMContract.trustedAggregator());
-    console.log('trustedAggregatorTimeout:', await polygonZkEVMContract.trustedAggregatorTimeout());
+    console.log('admin:', await xagonZkEVMContract.admin());
+    console.log('chainID:', await xagonZkEVMContract.chainID());
+    console.log('trustedSequencer:', await xagonZkEVMContract.trustedSequencer());
+    console.log('pendingStateTimeout:', await xagonZkEVMContract.pendingStateTimeout());
+    console.log('trustedAggregator:', await xagonZkEVMContract.trustedAggregator());
+    console.log('trustedAggregatorTimeout:', await xagonZkEVMContract.trustedAggregatorTimeout());
 
-    console.log('genesiRoot:', await polygonZkEVMContract.batchNumToStateRoot(0));
-    console.log('trustedSequencerURL:', await polygonZkEVMContract.trustedSequencerURL());
-    console.log('networkName:', await polygonZkEVMContract.networkName());
-    console.log('owner:', await polygonZkEVMContract.owner());
-    console.log('forkID:', await polygonZkEVMContract.forkID());
+    console.log('genesiRoot:', await xagonZkEVMContract.batchNumToStateRoot(0));
+    console.log('trustedSequencerURL:', await xagonZkEVMContract.trustedSequencerURL());
+    console.log('networkName:', await xagonZkEVMContract.networkName());
+    console.log('owner:', await xagonZkEVMContract.owner());
+    console.log('forkID:', await xagonZkEVMContract.forkID());
 
     // Assert admin address
     expect(await upgrades.erc1967.getAdminAddress(precalculateZkevmAddress)).to.be.equal(proxyAdminAddress);
@@ -461,7 +461,7 @@ async function main() {
 
     const proxyAdminInstance = proxyAdminFactory.attach(proxyAdminAddress);
     const proxyAdminOwner = await proxyAdminInstance.owner();
-    const timelockContractFactory = await ethers.getContractFactory('PolygonZkEVMTimelock', deployer);
+    const timelockContractFactory = await ethers.getContractFactory('XagonZkEVMTimelock', deployer);
 
     // TODO test stop here
 
@@ -469,11 +469,11 @@ async function main() {
     if (proxyAdminOwner !== deployer.address) {
         // Check if there's a timelock deployed there that match the current deployment
         timelockContract = timelockContractFactory.attach(proxyAdminOwner);
-        expect(precalculateZkevmAddress).to.be.equal(await timelockContract.polygonZkEVM());
+        expect(precalculateZkevmAddress).to.be.equal(await timelockContract.xagonZkEVM());
 
         console.log('#######################\n');
         console.log(
-            'Polygon timelockContract already deployed to:',
+            'Xagon timelockContract already deployed to:',
             timelockContract.address,
         );
     } else {
@@ -483,18 +483,18 @@ async function main() {
         console.log('#######################');
         console.log('minDelayTimelock:', minDelayTimelock);
         console.log('timelockAddress:', timelockAddress);
-        console.log('zkEVMAddress:', polygonZkEVMContract.address);
+        console.log('zkEVMAddress:', xagonZkEVMContract.address);
         timelockContract = await timelockContractFactory.deploy(
             minDelayTimelock,
             [timelockAddress],
             [timelockAddress],
             timelockAddress,
-            polygonZkEVMContract.address,
+            xagonZkEVMContract.address,
         );
         await timelockContract.deployed();
         console.log('#######################\n');
         console.log(
-            'Polygon timelockContract deployed to:',
+            'Xagon timelockContract deployed to:',
             timelockContract.address,
         );
 
@@ -507,12 +507,12 @@ async function main() {
     console.log('#####  Checks TimelockContract  #####');
     console.log('#######################');
     console.log('minDelayTimelock:', await timelockContract.getMinDelay());
-    console.log('polygonZkEVM:', await timelockContract.polygonZkEVM());
+    console.log('xagonZkEVM:', await timelockContract.xagonZkEVM());
 
     const outputJson = {
-        polygonZkEVMAddress: polygonZkEVMContract.address,
-        polygonZkEVMBridgeAddress: polygonZkEVMBridgeContract.address,
-        polygonZkEVMGlobalExitRootAddress: polygonZkEVMGlobalExitRoot.address,
+        xagonZkEVMAddress: xagonZkEVMContract.address,
+        xagonZkEVMBridgeAddress: xagonZkEVMBridgeContract.address,
+        xagonZkEVMGlobalExitRootAddress: xagonZkEVMGlobalExitRoot.address,
         maticTokenAddress,
         verifierAddress: verifierContract.address,
         zkEVMDeployerContract: zkEVMDeployerContract.address,

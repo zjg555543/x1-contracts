@@ -5,8 +5,8 @@ const { ethers } = require('hardhat');
 
 const gasPriceKeylessDeployment = '100'; // 100 gweis
 
-async function deployPolygonZkEVMDeployer(deployerAddress, signer) {
-    const PolgonZKEVMDeployerFactory = await ethers.getContractFactory('PolygonZkEVMDeployer', signer);
+async function deployXagonZkEVMDeployer(deployerAddress, signer) {
+    const PolgonZKEVMDeployerFactory = await ethers.getContractFactory('XagonZkEVMDeployer', signer);
 
     const deployTxZKEVMDeployer = (PolgonZKEVMDeployerFactory.getDeployTransaction(
         deployerAddress,
@@ -108,7 +108,7 @@ function getCreate2Address(polgonZKEVMDeployerContract, salt, deployTransaction)
 }
 
 module.exports = {
-    deployPolygonZkEVMDeployer,
+    deployXagonZkEVMDeployer,
     create2Deployment,
     getCreate2Address,
 };

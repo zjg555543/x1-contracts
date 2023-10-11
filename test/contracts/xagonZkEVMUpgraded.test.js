@@ -2,7 +2,7 @@
 const { expect } = require('chai');
 const { ethers, upgrades } = require('hardhat');
 
-describe('PolygonZkEVMUpgraded', () => {
+describe('XagonZkEVMUpgraded', () => {
     let deployer;
     let trustedAggregator;
     let trustedSequencer;
@@ -10,10 +10,10 @@ describe('PolygonZkEVMUpgraded', () => {
     let aggregator1;
 
     let verifierContract;
-    let polygonZkEVMBridgeContract;
-    let polygonZkEVMContract;
+    let xagonZkEVMBridgeContract;
+    let xagonZkEVMContract;
     let maticTokenContract;
-    let polygonZkEVMGlobalExitRoot;
+    let xagonZkEVMGlobalExitRoot;
 
     const maticTokenName = 'Matic Token';
     const maticTokenSymbol = 'MATIC';
@@ -32,7 +32,7 @@ describe('PolygonZkEVMUpgraded', () => {
     let firstDeployment = true;
     const currentVersion = 0;
 
-    // PolygonZkEVM Constants
+    // XagonZkEVM Constants
     const FORCE_BATCH_TIMEOUT = 60 * 60 * 24 * 5; // 5 days
 
     beforeEach('Deploy contract', async () => {
@@ -66,32 +66,32 @@ describe('PolygonZkEVMUpgraded', () => {
             firstDeployment = false;
         }
         const nonceProxyBridge = Number((await ethers.provider.getTransactionCount(deployer.address))) + (firstDeployment ? 3 : 2);
-        const nonceProxyZkevm = nonceProxyBridge + 2; // Always have to redeploy impl since the polygonZkEVMGlobalExitRoot address changes
+        const nonceProxyZkevm = nonceProxyBridge + 2; // Always have to redeploy impl since the xagonZkEVMGlobalExitRoot address changes
 
         const precalculateBridgeAddress = ethers.utils.getContractAddress({ from: deployer.address, nonce: nonceProxyBridge });
         const precalculateZkevmAddress = ethers.utils.getContractAddress({ from: deployer.address, nonce: nonceProxyZkevm });
         firstDeployment = false;
 
-        const PolygonZkEVMGlobalExitRootFactory = await ethers.getContractFactory('PolygonZkEVMGlobalExitRoot');
-        polygonZkEVMGlobalExitRoot = await upgrades.deployProxy(PolygonZkEVMGlobalExitRootFactory, [], {
+        const XagonZkEVMGlobalExitRootFactory = await ethers.getContractFactory('XagonZkEVMGlobalExitRoot');
+        xagonZkEVMGlobalExitRoot = await upgrades.deployProxy(XagonZkEVMGlobalExitRootFactory, [], {
             initializer: false,
             constructorArgs: [precalculateZkevmAddress, precalculateBridgeAddress],
             unsafeAllow: ['constructor', 'state-variable-immutable'],
         });
 
-        // deploy PolygonZkEVMBridge
-        const polygonZkEVMBridgeFactory = await ethers.getContractFactory('PolygonZkEVMBridge');
-        polygonZkEVMBridgeContract = await upgrades.deployProxy(polygonZkEVMBridgeFactory, [], { initializer: false });
+        // deploy XagonZkEVMBridge
+        const xagonZkEVMBridgeFactory = await ethers.getContractFactory('XagonZkEVMBridge');
+        xagonZkEVMBridgeContract = await upgrades.deployProxy(xagonZkEVMBridgeFactory, [], { initializer: false });
 
-        // deploy PolygonZkEVMTestnet
-        const PolygonZkEVMFactory = await ethers.getContractFactory('PolygonZkEVMUpgraded');
-        polygonZkEVMContract = await upgrades.deployProxy(PolygonZkEVMFactory, [], {
+        // deploy XagonZkEVMTestnet
+        const XagonZkEVMFactory = await ethers.getContractFactory('XagonZkEVMUpgraded');
+        xagonZkEVMContract = await upgrades.deployProxy(XagonZkEVMFactory, [], {
             initializer: false,
             constructorArgs: [
-                polygonZkEVMGlobalExitRoot.address,
+                xagonZkEVMGlobalExitRoot.address,
                 maticTokenContract.address,
                 verifierContract.address,
-                polygonZkEVMBridgeContract.address,
+                xagonZkEVMBridgeContract.address,
                 chainID,
                 forkID,
                 currentVersion,
@@ -99,11 +99,11 @@ describe('PolygonZkEVMUpgraded', () => {
             unsafeAllow: ['constructor', 'state-variable-immutable'],
         });
 
-        expect(precalculateBridgeAddress).to.be.equal(polygonZkEVMBridgeContract.address);
-        expect(precalculateZkevmAddress).to.be.equal(polygonZkEVMContract.address);
+        expect(precalculateBridgeAddress).to.be.equal(xagonZkEVMBridgeContract.address);
+        expect(precalculateZkevmAddress).to.be.equal(xagonZkEVMContract.address);
 
-        await polygonZkEVMBridgeContract.initialize(networkIDMainnet, polygonZkEVMGlobalExitRoot.address, polygonZkEVMContract.address);
-        await polygonZkEVMContract.initialize(
+        await xagonZkEVMBridgeContract.initialize(networkIDMainnet, xagonZkEVMGlobalExitRoot.address, xagonZkEVMContract.address);
+        await xagonZkEVMContract.initialize(
             {
                 admin: admin.address,
                 trustedSequencer: trustedSequencer.address,
@@ -122,32 +122,32 @@ describe('PolygonZkEVMUpgraded', () => {
     });
 
     it('should check the constructor parameters', async () => {
-        expect(await polygonZkEVMContract.version()).to.be.equal(0);
+        expect(await xagonZkEVMContract.version()).to.be.equal(0);
     });
 
     it('should check updateVersion', async () => {
         const newVersionString = '0.0.2';
 
         const lastVerifiedBatch = 0;
-        await expect(polygonZkEVMContract.updateVersion(newVersionString))
-            .to.emit(polygonZkEVMContract, 'UpdateZkEVMVersion').withArgs(lastVerifiedBatch, forkID, newVersionString);
+        await expect(xagonZkEVMContract.updateVersion(newVersionString))
+            .to.emit(xagonZkEVMContract, 'UpdateZkEVMVersion').withArgs(lastVerifiedBatch, forkID, newVersionString);
 
-        expect(await polygonZkEVMContract.version()).to.be.equal(1);
+        expect(await xagonZkEVMContract.version()).to.be.equal(1);
 
-        await expect(polygonZkEVMContract.updateVersion(newVersionString))
+        await expect(xagonZkEVMContract.updateVersion(newVersionString))
             .to.be.revertedWith('VersionAlreadyUpdated');
     });
 
-    it('should upgrade polygonKEVM', async () => {
-        // deploy PolygonZkEVMTestnet
-        const PolygonZkEVMFactory = await ethers.getContractFactory('PolygonZkEVM');
-        const oldPolygonZkEVMContract = await upgrades.deployProxy(PolygonZkEVMFactory, [], {
+    it('should upgrade xagonKEVM', async () => {
+        // deploy XagonZkEVMTestnet
+        const XagonZkEVMFactory = await ethers.getContractFactory('XagonZkEVM');
+        const oldXagonZkEVMContract = await upgrades.deployProxy(XagonZkEVMFactory, [], {
             initializer: false,
             constructorArgs: [
-                polygonZkEVMGlobalExitRoot.address,
+                xagonZkEVMGlobalExitRoot.address,
                 maticTokenContract.address,
                 verifierContract.address,
-                polygonZkEVMBridgeContract.address,
+                xagonZkEVMBridgeContract.address,
                 chainID,
                 forkID,
             ],
@@ -155,7 +155,7 @@ describe('PolygonZkEVMUpgraded', () => {
         });
 
         // initialize
-        await oldPolygonZkEVMContract.initialize(
+        await oldXagonZkEVMContract.initialize(
             {
                 admin: admin.address,
                 trustedSequencer: trustedSequencer.address,
@@ -172,24 +172,24 @@ describe('PolygonZkEVMUpgraded', () => {
         /*
          * Upgrade the contract
          */
-        const PolygonZkEVMUpgradedFactory = await ethers.getContractFactory('PolygonZkEVMUpgraded');
-        const polygonZkEVMUpgradedContract = PolygonZkEVMUpgradedFactory.attach(oldPolygonZkEVMContract.address);
+        const XagonZkEVMUpgradedFactory = await ethers.getContractFactory('XagonZkEVMUpgraded');
+        const xagonZkEVMUpgradedContract = XagonZkEVMUpgradedFactory.attach(oldXagonZkEVMContract.address);
 
         // Check that is the v0 contract
-        await expect(polygonZkEVMUpgradedContract.version()).to.be.reverted;
+        await expect(xagonZkEVMUpgradedContract.version()).to.be.reverted;
 
         // Upgrade the contract
         const newVersionString = '0.0.2';
 
         await upgrades.upgradeProxy(
-            polygonZkEVMContract.address,
-            PolygonZkEVMUpgradedFactory,
+            xagonZkEVMContract.address,
+            XagonZkEVMUpgradedFactory,
             {
                 constructorArgs: [
-                    polygonZkEVMGlobalExitRoot.address,
+                    xagonZkEVMGlobalExitRoot.address,
                     maticTokenContract.address,
                     verifierContract.address,
-                    polygonZkEVMBridgeContract.address,
+                    xagonZkEVMBridgeContract.address,
                     chainID,
                     forkID,
                     currentVersion],
@@ -198,35 +198,35 @@ describe('PolygonZkEVMUpgraded', () => {
             },
         );
 
-        expect(await polygonZkEVMContract.version()).to.be.equal(1);
-        await expect(polygonZkEVMContract.updateVersion(newVersionString))
+        expect(await xagonZkEVMContract.version()).to.be.equal(1);
+        await expect(xagonZkEVMContract.updateVersion(newVersionString))
             .to.be.revertedWith('VersionAlreadyUpdated');
     });
 
     it('should check the constructor parameters', async () => {
-        expect(await polygonZkEVMContract.globalExitRootManager()).to.be.equal(polygonZkEVMGlobalExitRoot.address);
-        expect(await polygonZkEVMContract.matic()).to.be.equal(maticTokenContract.address);
-        expect(await polygonZkEVMContract.rollupVerifier()).to.be.equal(verifierContract.address);
-        expect(await polygonZkEVMContract.bridgeAddress()).to.be.equal(polygonZkEVMBridgeContract.address);
+        expect(await xagonZkEVMContract.globalExitRootManager()).to.be.equal(xagonZkEVMGlobalExitRoot.address);
+        expect(await xagonZkEVMContract.matic()).to.be.equal(maticTokenContract.address);
+        expect(await xagonZkEVMContract.rollupVerifier()).to.be.equal(verifierContract.address);
+        expect(await xagonZkEVMContract.bridgeAddress()).to.be.equal(xagonZkEVMBridgeContract.address);
 
-        expect(await polygonZkEVMContract.owner()).to.be.equal(deployer.address);
-        expect(await polygonZkEVMContract.admin()).to.be.equal(admin.address);
-        expect(await polygonZkEVMContract.chainID()).to.be.equal(chainID);
-        expect(await polygonZkEVMContract.trustedSequencer()).to.be.equal(trustedSequencer.address);
-        expect(await polygonZkEVMContract.pendingStateTimeout()).to.be.equal(pendingStateTimeoutDefault);
-        expect(await polygonZkEVMContract.trustedAggregator()).to.be.equal(trustedAggregator.address);
-        expect(await polygonZkEVMContract.trustedAggregatorTimeout()).to.be.equal(trustedAggregatorTimeoutDefault);
+        expect(await xagonZkEVMContract.owner()).to.be.equal(deployer.address);
+        expect(await xagonZkEVMContract.admin()).to.be.equal(admin.address);
+        expect(await xagonZkEVMContract.chainID()).to.be.equal(chainID);
+        expect(await xagonZkEVMContract.trustedSequencer()).to.be.equal(trustedSequencer.address);
+        expect(await xagonZkEVMContract.pendingStateTimeout()).to.be.equal(pendingStateTimeoutDefault);
+        expect(await xagonZkEVMContract.trustedAggregator()).to.be.equal(trustedAggregator.address);
+        expect(await xagonZkEVMContract.trustedAggregatorTimeout()).to.be.equal(trustedAggregatorTimeoutDefault);
 
-        expect(await polygonZkEVMContract.batchNumToStateRoot(0)).to.be.equal(genesisRoot);
-        expect(await polygonZkEVMContract.trustedSequencerURL()).to.be.equal(urlSequencer);
-        expect(await polygonZkEVMContract.networkName()).to.be.equal(networkName);
+        expect(await xagonZkEVMContract.batchNumToStateRoot(0)).to.be.equal(genesisRoot);
+        expect(await xagonZkEVMContract.trustedSequencerURL()).to.be.equal(urlSequencer);
+        expect(await xagonZkEVMContract.networkName()).to.be.equal(networkName);
 
-        expect(await polygonZkEVMContract.batchFee()).to.be.equal(ethers.utils.parseEther('0.1'));
-        expect(await polygonZkEVMContract.batchFee()).to.be.equal(ethers.utils.parseEther('0.1'));
-        expect(await polygonZkEVMContract.getForcedBatchFee()).to.be.equal(ethers.utils.parseEther('10'));
+        expect(await xagonZkEVMContract.batchFee()).to.be.equal(ethers.utils.parseEther('0.1'));
+        expect(await xagonZkEVMContract.batchFee()).to.be.equal(ethers.utils.parseEther('0.1'));
+        expect(await xagonZkEVMContract.getForcedBatchFee()).to.be.equal(ethers.utils.parseEther('10'));
 
-        expect(await polygonZkEVMContract.forceBatchTimeout()).to.be.equal(FORCE_BATCH_TIMEOUT);
-        expect(await polygonZkEVMContract.isForcedBatchDisallowed()).to.be.equal(true);
+        expect(await xagonZkEVMContract.forceBatchTimeout()).to.be.equal(FORCE_BATCH_TIMEOUT);
+        expect(await xagonZkEVMContract.isForcedBatchDisallowed()).to.be.equal(true);
     });
 
     it('Test overridePendingState properly', async () => {
@@ -245,13 +245,13 @@ describe('PolygonZkEVMUpgraded', () => {
 
         // Approve lots of tokens
         await expect(
-            maticTokenContract.connect(trustedSequencer).approve(polygonZkEVMContract.address, maticTokenInitialBalance),
+            maticTokenContract.connect(trustedSequencer).approve(xagonZkEVMContract.address, maticTokenInitialBalance),
         ).to.emit(maticTokenContract, 'Approval');
 
         // Make 20 sequences of 5 batches, with 1 minut timestamp difference
         for (let i = 0; i < 20; i++) {
-            await expect(polygonZkEVMContract.connect(trustedSequencer).sequenceBatches(sequencesArray, trustedSequencer.address))
-                .to.emit(polygonZkEVMContract, 'SequenceBatches');
+            await expect(xagonZkEVMContract.connect(trustedSequencer).sequenceBatches(sequencesArray, trustedSequencer.address))
+                .to.emit(xagonZkEVMContract, 'SequenceBatches');
         }
         await ethers.provider.send('evm_increaseTime', [60]);
 
@@ -266,7 +266,7 @@ describe('PolygonZkEVMUpgraded', () => {
 
         // Verify batch 2 batches
         await expect(
-            polygonZkEVMContract.connect(aggregator1).verifyBatches(
+            xagonZkEVMContract.connect(aggregator1).verifyBatches(
                 currentPendingState,
                 currentNumBatch,
                 newBatch,
@@ -274,7 +274,7 @@ describe('PolygonZkEVMUpgraded', () => {
                 newStateRoot,
                 zkProofFFlonk,
             ),
-        ).to.emit(polygonZkEVMContract, 'VerifyBatches')
+        ).to.emit(xagonZkEVMContract, 'VerifyBatches')
             .withArgs(newBatch, newStateRoot, aggregator1.address);
 
         // verify second sequence
@@ -282,7 +282,7 @@ describe('PolygonZkEVMUpgraded', () => {
         currentNumBatch = newBatch;
         newBatch += batchesForSequence;
         await expect(
-            polygonZkEVMContract.connect(aggregator1).verifyBatches(
+            xagonZkEVMContract.connect(aggregator1).verifyBatches(
                 currentPendingState,
                 currentNumBatch,
                 newBatch,
@@ -290,13 +290,13 @@ describe('PolygonZkEVMUpgraded', () => {
                 newStateRoot,
                 zkProofFFlonk,
             ),
-        ).to.emit(polygonZkEVMContract, 'VerifyBatches')
+        ).to.emit(xagonZkEVMContract, 'VerifyBatches')
             .withArgs(newBatch, newStateRoot, aggregator1.address);
 
         const finalPendingState = 2;
 
         await expect(
-            polygonZkEVMContract.connect(aggregator1).overridePendingState(
+            xagonZkEVMContract.connect(aggregator1).overridePendingState(
                 currentPendingState,
                 finalPendingState,
                 currentNumBatch,
@@ -308,7 +308,7 @@ describe('PolygonZkEVMUpgraded', () => {
         ).to.be.revertedWith('OnlyTrustedAggregator');
 
         await expect(
-            polygonZkEVMContract.connect(trustedAggregator).overridePendingState(
+            xagonZkEVMContract.connect(trustedAggregator).overridePendingState(
                 finalPendingState + 1,
                 finalPendingState + 2,
                 currentNumBatch,
@@ -320,7 +320,7 @@ describe('PolygonZkEVMUpgraded', () => {
         ).to.be.revertedWith('PendingStateDoesNotExist');
 
         await expect(
-            polygonZkEVMContract.connect(trustedAggregator).overridePendingState(
+            xagonZkEVMContract.connect(trustedAggregator).overridePendingState(
                 currentPendingState,
                 finalPendingState,
                 currentNumBatch + 1,
@@ -332,7 +332,7 @@ describe('PolygonZkEVMUpgraded', () => {
         ).to.be.revertedWith('InitNumBatchDoesNotMatchPendingState');
 
         await expect(
-            polygonZkEVMContract.connect(trustedAggregator).overridePendingState(
+            xagonZkEVMContract.connect(trustedAggregator).overridePendingState(
                 currentPendingState,
                 finalPendingState,
                 currentNumBatch,
@@ -344,7 +344,7 @@ describe('PolygonZkEVMUpgraded', () => {
         ).to.be.revertedWith('FinalNumBatchDoesNotMatchPendingState');
 
         await expect(
-            polygonZkEVMContract.connect(trustedAggregator).overridePendingState(
+            xagonZkEVMContract.connect(trustedAggregator).overridePendingState(
                 0,
                 finalPendingState,
                 currentNumBatch,
@@ -356,7 +356,7 @@ describe('PolygonZkEVMUpgraded', () => {
         ).to.be.revertedWith('OldStateRootDoesNotExist');
 
         await expect(
-            polygonZkEVMContract.connect(trustedAggregator).overridePendingState(
+            xagonZkEVMContract.connect(trustedAggregator).overridePendingState(
                 finalPendingState,
                 finalPendingState,
                 currentNumBatch + 5,
@@ -368,7 +368,7 @@ describe('PolygonZkEVMUpgraded', () => {
         ).to.be.revertedWith('FinalPendingStateNumInvalid');
 
         await expect(
-            polygonZkEVMContract.connect(trustedAggregator).overridePendingState(
+            xagonZkEVMContract.connect(trustedAggregator).overridePendingState(
                 finalPendingState,
                 finalPendingState + 2,
                 currentNumBatch + 5,
@@ -380,7 +380,7 @@ describe('PolygonZkEVMUpgraded', () => {
         ).to.be.revertedWith('FinalPendingStateNumInvalid');
 
         await expect(
-            polygonZkEVMContract.connect(trustedAggregator).overridePendingState(
+            xagonZkEVMContract.connect(trustedAggregator).overridePendingState(
                 currentPendingState,
                 finalPendingState,
                 currentNumBatch,
@@ -392,7 +392,7 @@ describe('PolygonZkEVMUpgraded', () => {
         ).to.be.revertedWith('FinalNumBatchDoesNotMatchPendingState');
 
         await expect(
-            polygonZkEVMContract.connect(trustedAggregator).overridePendingState(
+            xagonZkEVMContract.connect(trustedAggregator).overridePendingState(
                 currentPendingState,
                 finalPendingState,
                 currentNumBatch,
@@ -405,7 +405,7 @@ describe('PolygonZkEVMUpgraded', () => {
 
         const newStateRoot2 = '0x0000000000000000000000000000000000000000000000000000000000000003';
         await expect(
-            polygonZkEVMContract.connect(trustedAggregator).overridePendingState(
+            xagonZkEVMContract.connect(trustedAggregator).overridePendingState(
                 currentPendingState,
                 finalPendingState,
                 currentNumBatch,
@@ -414,17 +414,17 @@ describe('PolygonZkEVMUpgraded', () => {
                 newStateRoot2,
                 zkProofFFlonk,
             ),
-        ).to.emit(polygonZkEVMContract, 'OverridePendingState').withArgs(newBatch, newStateRoot2, trustedAggregator.address);
+        ).to.emit(xagonZkEVMContract, 'OverridePendingState').withArgs(newBatch, newStateRoot2, trustedAggregator.address);
 
         // check pending state is clear
         currentPendingState = 0;
-        expect(currentPendingState).to.be.equal(await polygonZkEVMContract.lastPendingState());
-        expect(0).to.be.equal(await polygonZkEVMContract.lastPendingStateConsolidated());
+        expect(currentPendingState).to.be.equal(await xagonZkEVMContract.lastPendingState());
+        expect(0).to.be.equal(await xagonZkEVMContract.lastPendingStateConsolidated());
 
         // check consolidated state
         const currentVerifiedBatch = newBatch;
-        expect(currentVerifiedBatch).to.be.equal(await polygonZkEVMContract.lastVerifiedBatch());
-        expect(newStateRoot2).to.be.equal(await polygonZkEVMContract.batchNumToStateRoot(currentVerifiedBatch));
+        expect(currentVerifiedBatch).to.be.equal(await xagonZkEVMContract.lastVerifiedBatch());
+        expect(newStateRoot2).to.be.equal(await xagonZkEVMContract.batchNumToStateRoot(currentVerifiedBatch));
     });
 
     it('Test overridePendingState fails cause was last forkID', async () => {
@@ -443,13 +443,13 @@ describe('PolygonZkEVMUpgraded', () => {
 
         // Approve lots of tokens
         await expect(
-            maticTokenContract.connect(trustedSequencer).approve(polygonZkEVMContract.address, maticTokenInitialBalance),
+            maticTokenContract.connect(trustedSequencer).approve(xagonZkEVMContract.address, maticTokenInitialBalance),
         ).to.emit(maticTokenContract, 'Approval');
 
         // Make 20 sequences of 5 batches, with 1 minut timestamp difference
         for (let i = 0; i < 20; i++) {
-            await expect(polygonZkEVMContract.connect(trustedSequencer).sequenceBatches(sequencesArray, trustedSequencer.address))
-                .to.emit(polygonZkEVMContract, 'SequenceBatches');
+            await expect(xagonZkEVMContract.connect(trustedSequencer).sequenceBatches(sequencesArray, trustedSequencer.address))
+                .to.emit(xagonZkEVMContract, 'SequenceBatches');
         }
         await ethers.provider.send('evm_increaseTime', [60]);
 
@@ -464,7 +464,7 @@ describe('PolygonZkEVMUpgraded', () => {
 
         // Verify batch 2 batches
         await expect(
-            polygonZkEVMContract.connect(aggregator1).verifyBatches(
+            xagonZkEVMContract.connect(aggregator1).verifyBatches(
                 currentPendingState,
                 currentNumBatch,
                 newBatch,
@@ -472,7 +472,7 @@ describe('PolygonZkEVMUpgraded', () => {
                 newStateRoot,
                 zkProofFFlonk,
             ),
-        ).to.emit(polygonZkEVMContract, 'VerifyBatches')
+        ).to.emit(xagonZkEVMContract, 'VerifyBatches')
             .withArgs(newBatch, newStateRoot, aggregator1.address);
 
         // verify second sequence
@@ -480,7 +480,7 @@ describe('PolygonZkEVMUpgraded', () => {
         currentNumBatch = newBatch;
         newBatch += batchesForSequence;
         await expect(
-            polygonZkEVMContract.connect(aggregator1).verifyBatches(
+            xagonZkEVMContract.connect(aggregator1).verifyBatches(
                 currentPendingState,
                 currentNumBatch,
                 newBatch,
@@ -488,27 +488,27 @@ describe('PolygonZkEVMUpgraded', () => {
                 newStateRoot,
                 zkProofFFlonk,
             ),
-        ).to.emit(polygonZkEVMContract, 'VerifyBatches')
+        ).to.emit(xagonZkEVMContract, 'VerifyBatches')
             .withArgs(newBatch, newStateRoot, aggregator1.address);
 
         const finalPendingState = 2;
 
         const consolidatedBatch = batchesForSequence;
         await expect(
-            polygonZkEVMContract.connect(trustedAggregator).consolidatePendingState(
+            xagonZkEVMContract.connect(trustedAggregator).consolidatePendingState(
                 1, // pending state num
             ),
-        ).to.emit(polygonZkEVMContract, 'ConsolidatePendingState')
+        ).to.emit(xagonZkEVMContract, 'ConsolidatePendingState')
             .withArgs(consolidatedBatch, newStateRoot, 1);
 
         // Upgrade the contract
         const newVersionString = '0.0.3';
-        await expect(polygonZkEVMContract.updateVersion(newVersionString))
-            .to.emit(polygonZkEVMContract, 'UpdateZkEVMVersion').withArgs(consolidatedBatch, forkID, newVersionString);
+        await expect(xagonZkEVMContract.updateVersion(newVersionString))
+            .to.emit(xagonZkEVMContract, 'UpdateZkEVMVersion').withArgs(consolidatedBatch, forkID, newVersionString);
 
         const newStateRoot2 = '0x0000000000000000000000000000000000000000000000000000000000000003';
         await expect(
-            polygonZkEVMContract.connect(trustedAggregator).overridePendingState(
+            xagonZkEVMContract.connect(trustedAggregator).overridePendingState(
                 0,
                 finalPendingState,
                 0,
@@ -536,13 +536,13 @@ describe('PolygonZkEVMUpgraded', () => {
 
         // Approve lots of tokens
         await expect(
-            maticTokenContract.connect(trustedSequencer).approve(polygonZkEVMContract.address, maticTokenInitialBalance),
+            maticTokenContract.connect(trustedSequencer).approve(xagonZkEVMContract.address, maticTokenInitialBalance),
         ).to.emit(maticTokenContract, 'Approval');
 
         // Make 20 sequences of 5 batches, with 1 minut timestamp difference
         for (let i = 0; i < 20; i++) {
-            await expect(polygonZkEVMContract.connect(trustedSequencer).sequenceBatches(sequencesArray, trustedSequencer.address))
-                .to.emit(polygonZkEVMContract, 'SequenceBatches');
+            await expect(xagonZkEVMContract.connect(trustedSequencer).sequenceBatches(sequencesArray, trustedSequencer.address))
+                .to.emit(xagonZkEVMContract, 'SequenceBatches');
         }
         await ethers.provider.send('evm_increaseTime', [60]);
 
@@ -557,7 +557,7 @@ describe('PolygonZkEVMUpgraded', () => {
 
         // Verify batch 2 batches
         await expect(
-            polygonZkEVMContract.connect(aggregator1).verifyBatches(
+            xagonZkEVMContract.connect(aggregator1).verifyBatches(
                 currentPendingState,
                 currentNumBatch,
                 newBatch,
@@ -565,7 +565,7 @@ describe('PolygonZkEVMUpgraded', () => {
                 newStateRoot,
                 zkProofFFlonk,
             ),
-        ).to.emit(polygonZkEVMContract, 'VerifyBatches')
+        ).to.emit(xagonZkEVMContract, 'VerifyBatches')
             .withArgs(newBatch, newStateRoot, aggregator1.address);
 
         // verify second sequence
@@ -573,7 +573,7 @@ describe('PolygonZkEVMUpgraded', () => {
         currentNumBatch = newBatch;
         newBatch += batchesForSequence;
         await expect(
-            polygonZkEVMContract.connect(aggregator1).verifyBatches(
+            xagonZkEVMContract.connect(aggregator1).verifyBatches(
                 currentPendingState,
                 currentNumBatch,
                 newBatch,
@@ -581,38 +581,38 @@ describe('PolygonZkEVMUpgraded', () => {
                 newStateRoot,
                 zkProofFFlonk,
             ),
-        ).to.emit(polygonZkEVMContract, 'VerifyBatches')
+        ).to.emit(xagonZkEVMContract, 'VerifyBatches')
             .withArgs(newBatch, newStateRoot, aggregator1.address);
 
         const finalPendingState = 2;
 
         const consolidatedBatch = batchesForSequence;
         await expect(
-            polygonZkEVMContract.connect(trustedAggregator).consolidatePendingState(
+            xagonZkEVMContract.connect(trustedAggregator).consolidatePendingState(
                 1, // pending state num
             ),
-        ).to.emit(polygonZkEVMContract, 'ConsolidatePendingState')
+        ).to.emit(xagonZkEVMContract, 'ConsolidatePendingState')
             .withArgs(consolidatedBatch, newStateRoot, 1);
 
         await expect(
-            polygonZkEVMContract.connect(trustedAggregator).consolidatePendingState(
+            xagonZkEVMContract.connect(trustedAggregator).consolidatePendingState(
                 finalPendingState, // pending state num
             ),
-        ).to.emit(polygonZkEVMContract, 'ConsolidatePendingState')
+        ).to.emit(xagonZkEVMContract, 'ConsolidatePendingState')
             .withArgs(newBatch, newStateRoot, finalPendingState);
 
         // Upgrade the contract
         const newVersionString = '0.0.3';
         const updatedBatch = newBatch;
-        await expect(polygonZkEVMContract.updateVersion(newVersionString))
-            .to.emit(polygonZkEVMContract, 'UpdateZkEVMVersion').withArgs(updatedBatch, forkID, newVersionString);
+        await expect(xagonZkEVMContract.updateVersion(newVersionString))
+            .to.emit(xagonZkEVMContract, 'UpdateZkEVMVersion').withArgs(updatedBatch, forkID, newVersionString);
 
         // verify second sequence
         currentPendingState++;
         currentNumBatch = newBatch;
         newBatch += batchesForSequence;
         await expect(
-            polygonZkEVMContract.connect(aggregator1).verifyBatches(
+            xagonZkEVMContract.connect(aggregator1).verifyBatches(
                 currentPendingState,
                 currentNumBatch,
                 newBatch,
@@ -620,12 +620,12 @@ describe('PolygonZkEVMUpgraded', () => {
                 newStateRoot,
                 zkProofFFlonk,
             ),
-        ).to.emit(polygonZkEVMContract, 'VerifyBatches')
+        ).to.emit(xagonZkEVMContract, 'VerifyBatches')
             .withArgs(newBatch, newStateRoot, aggregator1.address);
 
         const newStateRoot2 = '0x0000000000000000000000000000000000000000000000000000000000000003';
         await expect(
-            polygonZkEVMContract.connect(trustedAggregator).overridePendingState(
+            xagonZkEVMContract.connect(trustedAggregator).overridePendingState(
                 0,
                 currentPendingState,
                 consolidatedBatch,
@@ -637,7 +637,7 @@ describe('PolygonZkEVMUpgraded', () => {
         ).to.be.revertedWith('InitBatchMustMatchCurrentForkID');
 
         await expect(
-            polygonZkEVMContract.connect(trustedAggregator).overridePendingState(
+            xagonZkEVMContract.connect(trustedAggregator).overridePendingState(
                 0,
                 currentPendingState,
                 updatedBatch - 1,
@@ -649,7 +649,7 @@ describe('PolygonZkEVMUpgraded', () => {
         ).to.be.revertedWith('InitBatchMustMatchCurrentForkID');
 
         await expect(
-            polygonZkEVMContract.connect(trustedAggregator).verifyBatchesTrustedAggregator(
+            xagonZkEVMContract.connect(trustedAggregator).verifyBatchesTrustedAggregator(
                 0,
                 updatedBatch - 1,
                 newBatch,

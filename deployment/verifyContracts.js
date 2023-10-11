@@ -62,7 +62,7 @@ async function main() {
                     [timelockAddress],
                     [timelockAddress],
                     timelockAddress,
-                    deployOutputParameters.polygonZkEVMAddress,
+                    deployOutputParameters.xagonZkEVMAddress,
                 ],
             },
         );
@@ -87,12 +87,12 @@ async function main() {
         await hre.run(
             'verify:verify',
             {
-                address: deployOutputParameters.polygonZkEVMAddress,
+                address: deployOutputParameters.xagonZkEVMAddress,
                 constructorArguments: [
-                    deployOutputParameters.polygonZkEVMGlobalExitRootAddress,
+                    deployOutputParameters.xagonZkEVMGlobalExitRootAddress,
                     deployOutputParameters.maticTokenAddress,
                     deployOutputParameters.verifierAddress,
-                    deployOutputParameters.polygonZkEVMBridgeAddress,
+                    deployOutputParameters.xagonZkEVMBridgeAddress,
                     deployOutputParameters.chainID,
                     deployOutputParameters.forkID,
                 ],
@@ -107,10 +107,10 @@ async function main() {
         await hre.run(
             'verify:verify',
             {
-                address: deployOutputParameters.polygonZkEVMGlobalExitRootAddress,
+                address: deployOutputParameters.xagonZkEVMGlobalExitRootAddress,
                 constructorArguments: [
-                    deployOutputParameters.polygonZkEVMAddress,
-                    deployOutputParameters.polygonZkEVMBridgeAddress,
+                    deployOutputParameters.xagonZkEVMAddress,
+                    deployOutputParameters.xagonZkEVMBridgeAddress,
                 ],
             },
         );
@@ -122,7 +122,7 @@ async function main() {
         await hre.run(
             'verify:verify',
             {
-                address: deployOutputParameters.polygonZkEVMBridgeAddress,
+                address: deployOutputParameters.xagonZkEVMBridgeAddress,
             },
         );
     } catch (error) {

@@ -1,7 +1,7 @@
 {
   "_format": "hh-sol-artifact-1",
-  "contractName": "PolygonZkEVMGlobalExitRootL2",
-  "sourceName": "contracts/PolygonZkEVMGlobalExitRootL2.sol",
+  "contractName": "XagonZkEVMGlobalExitRootL2",
+  "sourceName": "contracts/XagonZkEVMGlobalExitRootL2.sol",
   "abi": [
     {
       "inputs": [

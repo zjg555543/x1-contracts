@@ -14,7 +14,7 @@ The special zkRom variables will be accessed and updated directly by the zkRom
 #### Parameters:
 | Name | Type | Description                                                          |
 | :--- | :--- | :------------------------------------------------------------------- |
-|`_bridgeAddress` | address | PolygonZkEVMBridge contract address
+|`_bridgeAddress` | address | XagonZkEVMBridge contract address
 
 ### updateExitRoot
 ```solidity

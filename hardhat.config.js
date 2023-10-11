@@ -122,7 +122,7 @@ module.exports = {
                 count: 20,
             },
         },
-        polygonZKEVMTestnet: {
+        xagonZKEVMTestnet: {
             url: 'https://rpc.public.zkevm-test.net',
             accounts: {
                 mnemonic: process.env.MNEMONIC || DEFAULT_MNEMONIC,
@@ -131,7 +131,7 @@ module.exports = {
                 count: 20,
             },
         },
-        polygonZKEVMMainnet: {
+        xagonZKEVMMainnet: {
             url: 'https://zkevm-rpc.com',
             accounts: {
                 mnemonic: process.env.MNEMONIC || DEFAULT_MNEMONIC,
@@ -148,26 +148,26 @@ module.exports = {
     },
     etherscan: {
         apiKey: {
-            polygonZKEVMTestnet: `${process.env.ETHERSCAN_ZKEVM_API_KEY}`,
-            polygonZKEVMMainnet: `${process.env.ETHERSCAN_ZKEVM_API_KEY}`,
+            xagonZKEVMTestnet: `${process.env.ETHERSCAN_ZKEVM_API_KEY}`,
+            xagonZKEVMMainnet: `${process.env.ETHERSCAN_ZKEVM_API_KEY}`,
             goerli: `${process.env.ETHERSCAN_API_KEY}`,
             mainnet: `${process.env.ETHERSCAN_API_KEY}`,
         },
         customChains: [
             {
-                network: 'polygonZKEVMMainnet',
+                network: 'xagonZKEVMMainnet',
                 chainId: 1101,
                 urls: {
-                    apiURL: 'https://api-zkevm.polygonscan.com/api',
-                    browserURL: 'https://zkevm.polygonscan.com/',
+                    apiURL: 'https://api-zkevm.xagonscan.com/api',
+                    browserURL: 'https://zkevm.xagonscan.com/',
                 },
             },
             {
-                network: 'polygonZKEVMTestnet',
+                network: 'xagonZKEVMTestnet',
                 chainId: 1442,
                 urls: {
-                    apiURL: 'https://api-testnet-zkevm.polygonscan.com/api',
-                    browserURL: 'https://testnet-zkevm.polygonscan.com/',
+                    apiURL: 'https://api-testnet-zkevm.xagonscan.com/api',
+                    browserURL: 'https://testnet-zkevm.xagonscan.com/',
                 },
             },
         ],

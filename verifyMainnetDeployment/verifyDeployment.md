@@ -19,7 +19,7 @@ node -v
 DOwnload and install the zkevm-contracts repository and go to the specific commit
 
 ```bash
-git clone https://github.com/0xPolygonHermez/zkevm-contracts
+git clone https://github.com/0xXagonHermez/zkevm-contracts
 npm i
 git checkout 7a8d0c1950cf267fb7b10be8a47506754399cd4a
 ```
@@ -53,7 +53,7 @@ This script verifies the deployed bytecode of the address provided in `deploymen
 
 ## Verify genesis root
 
-At the end of the previous script we also verify that the genesis provided in the`deploymentMainnet.json` matches hte one in the `polygonZkEVM`
+At the end of the previous script we also verify that the genesis provided in the`deploymentMainnet.json` matches hte one in the `xagonZkEVM`
 
 In order to verify the genesis, you can the script to generate it. The script in a very similar behaviour of the last script, deploy localy the contracts and then copy the deployed btyecode into the corresponding address.
 

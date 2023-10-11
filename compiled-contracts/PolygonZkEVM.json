@@ -1,12 +1,12 @@
 {
   "_format": "hh-sol-artifact-1",
-  "contractName": "PolygonZkEVM",
-  "sourceName": "contracts/PolygonZkEVM.sol",
+  "contractName": "XagonZkEVM",
+  "sourceName": "contracts/XagonZkEVM.sol",
   "abi": [
     {
       "inputs": [
         {
-          "internalType": "contract IPolygonZkEVMGlobalExitRoot",
+          "internalType": "contract IXagonZkEVMGlobalExitRoot",
           "name": "_globalExitRootManager",
           "type": "address"
         },
@@ -21,7 +21,7 @@
           "type": "address"
         },
         {
-          "internalType": "contract IPolygonZkEVMBridge",
+          "internalType": "contract IXagonZkEVMBridge",
           "name": "_bridgeAddress",
           "type": "address"
         },
@@ -712,7 +712,7 @@
       "name": "bridgeAddress",
       "outputs": [
         {
-          "internalType": "contract IPolygonZkEVMBridge",
+          "internalType": "contract IXagonZkEVMBridge",
           "name": "",
           "type": "address"
         }
@@ -918,7 +918,7 @@
       "name": "globalExitRootManager",
       "outputs": [
         {
-          "internalType": "contract IPolygonZkEVMGlobalExitRoot",
+          "internalType": "contract IXagonZkEVMGlobalExitRoot",
           "name": "",
           "type": "address"
         }
@@ -956,7 +956,7 @@
               "type": "uint64"
             }
           ],
-          "internalType": "struct PolygonZkEVM.InitializePackedParameters",
+          "internalType": "struct XagonZkEVM.InitializePackedParameters",
           "name": "initializePackedParameters",
           "type": "tuple"
         },
@@ -1365,7 +1365,7 @@
               "type": "uint64"
             }
           ],
-          "internalType": "struct PolygonZkEVM.BatchData[]",
+          "internalType": "struct XagonZkEVM.BatchData[]",
           "name": "batches",
           "type": "tuple[]"
         },
@@ -1400,7 +1400,7 @@
               "type": "uint64"
             }
           ],
-          "internalType": "struct PolygonZkEVM.ForcedBatchData[]",
+          "internalType": "struct XagonZkEVM.ForcedBatchData[]",
           "name": "batches",
           "type": "tuple[]"
         }

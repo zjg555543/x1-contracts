@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity 0.8.20;
 
-import "../PolygonZkEVMGlobalExitRoot.sol";
+import "../XagonZkEVMGlobalExitRoot.sol";
 
 /**
  * Contract responsible for managing the exit roots across multiple networks
 
  */
-contract PolygonZkEVMGlobalExitRootMock is PolygonZkEVMGlobalExitRoot {
+contract XagonZkEVMGlobalExitRootMock is XagonZkEVMGlobalExitRoot {
     /**
      * @param _rollupAddress Rollup contract address
-     * @param _bridgeAddress PolygonZkEVM Bridge contract address
+     * @param _bridgeAddress XagonZkEVM Bridge contract address
      */
     constructor(
         address _rollupAddress,
         address _bridgeAddress
-    ) PolygonZkEVMGlobalExitRoot(_rollupAddress, _bridgeAddress) {}
+    ) XagonZkEVMGlobalExitRoot(_rollupAddress, _bridgeAddress) {}
 
     /**
      * @notice Set last global exit root

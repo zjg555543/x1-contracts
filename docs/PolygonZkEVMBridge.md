@@ -1,4 +1,4 @@
-PolygonZkEVMBridge that will be deployed on both networks Ethereum and Polygon zkEVM
+XagonZkEVMBridge that will be deployed on both networks Ethereum and Xagon zkEVM
 Contract responsible to manage the token interactions with other networks
 
 
@@ -7,19 +7,19 @@ Contract responsible to manage the token interactions with other networks
 ```solidity
   function initialize(
     uint32 _networkID,
-    contract IBasePolygonZkEVMGlobalExitRoot _globalExitRootManager,
-    address _polygonZkEVMaddress
+    contract IBaseXagonZkEVMGlobalExitRoot _globalExitRootManager,
+    address _xagonZkEVMaddress
   ) external
 ```
-The value of `_polygonZkEVMaddress` on the L2 deployment of the contract will be address(0), so
+The value of `_xagonZkEVMaddress` on the L2 deployment of the contract will be address(0), so
 emergency state is not possible for the L2 deployment of the bridge, intentionally
 
 #### Parameters:
 | Name | Type | Description                                                          |
 | :--- | :--- | :------------------------------------------------------------------- |
 |`_networkID` | uint32 | networkID
-|`_globalExitRootManager` | contract IBasePolygonZkEVMGlobalExitRoot | global exit root manager address
-|`_polygonZkEVMaddress` | address | polygonZkEVM address
+|`_globalExitRootManager` | contract IBaseXagonZkEVMGlobalExitRoot | global exit root manager address
+|`_xagonZkEVMaddress` | address | xagonZkEVM address
 
 
 ### bridgeAsset
@@ -180,7 +180,7 @@ Returns the address of a wrapper using the token information if already exist
   ) external
 ```
 Function to activate the emergency state
-     " Only can be called by the Polygon ZK-EVM in extreme situations
+     " Only can be called by the Xagon ZK-EVM in extreme situations
 
 
 
@@ -190,7 +190,7 @@ Function to activate the emergency state
   ) external
 ```
 Function to deactivate the emergency state
-     " Only can be called by the Polygon ZK-EVM
+     " Only can be called by the Xagon ZK-EVM
 
 
 

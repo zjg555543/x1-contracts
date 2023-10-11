@@ -4,7 +4,7 @@ import "../lib/DepositContract.sol";
 import "hardhat/console.sol";
 
 /**
- * This contract will be used as a helper for PolygonZkEVM tests
+ * This contract will be used as a helper for XagonZkEVM tests
  */
 contract SendData {
     /**

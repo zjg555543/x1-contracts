@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.20;
 
-interface IPolygonZkEVMErrors {
+interface IXagonZkEVMErrors {
     /**
      * @dev Thrown when the pending state timeout exceeds the _HALT_AGGREGATION_TIMEOUT
      */

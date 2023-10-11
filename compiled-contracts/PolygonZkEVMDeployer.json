@@ -1,7 +1,7 @@
 {
   "_format": "hh-sol-artifact-1",
-  "contractName": "PolygonZkEVMDeployer",
-  "sourceName": "contracts/deployment/PolygonZkEVMDeployer.sol",
+  "contractName": "XagonZkEVMDeployer",
+  "sourceName": "contracts/deployment/XagonZkEVMDeployer.sol",
   "abi": [
     {
       "inputs": [

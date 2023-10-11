@@ -1,8 +1,8 @@
 # zkevm-contracts
 
-Smart contract implementation which will be used by the polygon-hermez zkevm
+Smart contract implementation which will be used by the xagon-hermez zkevm
 
-[![Main CI](https://github.com/0xPolygonHermez/zkevm-contracts/actions/workflows/main.yml/badge.svg)](https://github.com/0xPolygonHermez/zkevm-contracts/actions/workflows/main.yml)
+[![Main CI](https://github.com/0xXagonHermez/zkevm-contracts/actions/workflows/main.yml/badge.svg)](https://github.com/0xXagonHermez/zkevm-contracts/actions/workflows/main.yml)
 
 ## Note
 
@@ -16,10 +16,10 @@ Private keys and mnemonics contained in this repository are used for internal te
 ## Repository structure
 
 - `contracts`: zkevm contracts
-  - `PolygonZkEVMBridge.sol`: transfer assets between chains
-    - `PolygonZkEVMGlobalExitRoot.sol`: manage global exit root in L1
-    - `PolygonZkEVMGlobalExitRootL2.sol`: manage global exit root in L2
-  - `PolygonZkEVM.sol`: consensus algorithm used by polygon hermez zkevm
+  - `XagonZkEVMBridge.sol`: transfer assets between chains
+    - `XagonZkEVMGlobalExitRoot.sol`: manage global exit root in L1
+    - `XagonZkEVMGlobalExitRootL2.sol`: manage global exit root in L2
+  - `XagonZkEVM.sol`: consensus algorithm used by xagon hermez zkevm
 - `docs`: specs and useful links
 - `test`: contracts tests
 

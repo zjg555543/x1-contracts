@@ -35,11 +35,11 @@ async function main() {
     await hre.run('compile');
 
     for (const upgrade of upgradeParameters.upgrades) {
-        const proxyPolygonAddress = upgrade.address;
-        const polygonZkEVMFactory = await ethers.getContractFactory(upgrade.contractName, deployer);
+        const proxyXagonAddress = upgrade.address;
+        const xagonZkEVMFactory = await ethers.getContractFactory(upgrade.contractName, deployer);
 
         if (upgrade.constructorArgs) {
-            const txZKEVM = await upgrades.upgradeProxy(proxyPolygonAddress, polygonZkEVMFactory, 
+            const txZKEVM = await upgrades.upgradeProxy(proxyXagonAddress, xagonZkEVMFactory, 
             {
                 constructorArgs: upgrade.constructorArgs,
                 unsafeAllow: ['constructor', 'state-variable-immutable'],
@@ -55,7 +55,7 @@ async function main() {
             console.log(`npx hardhat verify --constructor-args upgrade/arguments.js ${txZKEVM.address} --network ${process.env.HARDHAT_NETWORK}\n`);
             console.log("Copy the following constructor arguments on: upgrade/arguments.js \n", upgrade.constructorArgs)
         } else {
-            const txZKEVM = await upgrades.upgradeProxy(proxyPolygonAddress, polygonZkEVMFactory)
+            const txZKEVM = await upgrades.upgradeProxy(proxyXagonAddress, xagonZkEVMFactory)
 
             console.log(txZKEVM.address);
             console.log("you can verify the new impl address with:")

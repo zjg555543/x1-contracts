@@ -2,11 +2,11 @@
 
 pragma solidity ^0.8.20;
 
-interface IPolygonZkEVMBridge {
+interface IXagonZkEVMBridge {
     /**
-     * @dev Thrown when sender is not the PolygonZkEVM address
+     * @dev Thrown when sender is not the XagonZkEVM address
      */
-    error OnlyPolygonZkEVM();
+    error OnlyXagonZkEVM();
 
     /**
      * @dev Thrown when the destination network is invalid

@@ -6,22 +6,22 @@ if npm run lint; then
     npx hardhat compile --force
     npm run docgen
     git add docs
-    cp artifacts/contracts/PolygonZkEVMBridge.sol/PolygonZkEVMBridge.json compiled-contracts/
-    cp artifacts/contracts/PolygonZkEVMGlobalExitRoot.sol/PolygonZkEVMGlobalExitRoot.json compiled-contracts/
-    cp artifacts/contracts/PolygonZkEVMGlobalExitRootL2.sol/PolygonZkEVMGlobalExitRootL2.json compiled-contracts/
+    cp artifacts/contracts/XagonZkEVMBridge.sol/XagonZkEVMBridge.json compiled-contracts/
+    cp artifacts/contracts/XagonZkEVMGlobalExitRoot.sol/XagonZkEVMGlobalExitRoot.json compiled-contracts/
+    cp artifacts/contracts/XagonZkEVMGlobalExitRootL2.sol/XagonZkEVMGlobalExitRootL2.json compiled-contracts/
     cp artifacts/contracts/lib/TokenWrapped.sol/TokenWrapped.json compiled-contracts/
-    cp artifacts/contracts/mocks/PolygonZkEVMBridgeMock.sol/PolygonZkEVMBridgeMock.json compiled-contracts/
+    cp artifacts/contracts/mocks/XagonZkEVMBridgeMock.sol/XagonZkEVMBridgeMock.json compiled-contracts/
     cp artifacts/contracts/mocks/ERC20PermitMock.sol/ERC20PermitMock.json compiled-contracts/
-    cp artifacts/contracts/mocks/PolygonZkEVMGlobalExitRootL2Mock.sol/PolygonZkEVMGlobalExitRootL2Mock.json compiled-contracts/
-    cp artifacts/contracts/mocks/PolygonZkEVMGlobalExitRootMock.sol/PolygonZkEVMGlobalExitRootMock.json compiled-contracts/
-    cp artifacts/contracts/mocks/PolygonZkEVMMock.sol/PolygonZkEVMMock.json compiled-contracts/
+    cp artifacts/contracts/mocks/XagonZkEVMGlobalExitRootL2Mock.sol/XagonZkEVMGlobalExitRootL2Mock.json compiled-contracts/
+    cp artifacts/contracts/mocks/XagonZkEVMGlobalExitRootMock.sol/XagonZkEVMGlobalExitRootMock.json compiled-contracts/
+    cp artifacts/contracts/mocks/XagonZkEVMMock.sol/XagonZkEVMMock.json compiled-contracts/
     cp artifacts/contracts/mocks/VerifierRollupHelperMock.sol/VerifierRollupHelperMock.json compiled-contracts/
-    cp artifacts/contracts/PolygonZkEVM.sol/PolygonZkEVM.json compiled-contracts/
+    cp artifacts/contracts/XagonZkEVM.sol/XagonZkEVM.json compiled-contracts/
     cp artifacts/contracts/verifiers/FflonkVerifier.sol/FflonkVerifier.json compiled-contracts/
     cp artifacts/@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol/ProxyAdmin.json compiled-contracts/
     cp artifacts/@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol/TransparentUpgradeableProxy.json compiled-contracts/
-    cp artifacts/contracts/deployment/PolygonZkEVMDeployer.sol/PolygonZkEVMDeployer.json compiled-contracts/
-    cp artifacts/contracts/PolygonZkEVMTimelock.sol/PolygonZkEVMTimelock.json compiled-contracts/
+    cp artifacts/contracts/deployment/XagonZkEVMDeployer.sol/XagonZkEVMDeployer.json compiled-contracts/
+    cp artifacts/contracts/XagonZkEVMTimelock.sol/XagonZkEVMTimelock.json compiled-contracts/
     git add compiled-contracts
     exit 0
 else

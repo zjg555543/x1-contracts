@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity 0.8.20;
-import "../PolygonZkEVMBridge.sol";
+import "../XagonZkEVMBridge.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
- * PolygonZkEVMBridge that will be deployed on both networks Ethereum and Polygon zkEVM
+ * XagonZkEVMBridge that will be deployed on both networks Ethereum and Xagon zkEVM
  * Contract responsible to manage the token interactions with other networks
  */
-contract PolygonZkEVMBridgeMock is PolygonZkEVMBridge, OwnableUpgradeable {
+contract XagonZkEVMBridgeMock is XagonZkEVMBridge, OwnableUpgradeable {
     uint256 public maxEtherBridge;
 
     /**
@@ -16,12 +16,12 @@ contract PolygonZkEVMBridgeMock is PolygonZkEVMBridge, OwnableUpgradeable {
      */
     function initialize(
         uint32 _networkID,
-        IBasePolygonZkEVMGlobalExitRoot _globalExitRootManager,
-        address _polygonZkEVMaddress
+        IBaseXagonZkEVMGlobalExitRoot _globalExitRootManager,
+        address _xagonZkEVMaddress
     ) public override initializer {
         networkID = _networkID;
         globalExitRootManager = _globalExitRootManager;
-        polygonZkEVMaddress = _polygonZkEVMaddress;
+        xagonZkEVMaddress = _xagonZkEVMaddress;
 
         maxEtherBridge = 0.25 ether;
 
@@ -55,7 +55,7 @@ contract PolygonZkEVMBridgeMock is PolygonZkEVMBridge, OwnableUpgradeable {
     ) public payable override {
         require(
             msg.value <= maxEtherBridge,
-            "PolygonZkEVMBridge::bridgeAsset: Cannot bridge more than maxEtherBridge"
+            "XagonZkEVMBridge::bridgeAsset: Cannot bridge more than maxEtherBridge"
         );
         super.bridgeAsset(
             destinationNetwork,

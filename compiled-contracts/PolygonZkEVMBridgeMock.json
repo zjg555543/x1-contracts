@@ -1,7 +1,7 @@
 {
   "_format": "hh-sol-artifact-1",
-  "contractName": "PolygonZkEVMBridgeMock",
-  "sourceName": "contracts/mocks/PolygonZkEVMBridgeMock.sol",
+  "contractName": "XagonZkEVMBridgeMock",
+  "sourceName": "contracts/mocks/XagonZkEVMBridgeMock.sol",
   "abi": [
     {
       "inputs": [],
@@ -80,7 +80,7 @@
     },
     {
       "inputs": [],
-      "name": "OnlyPolygonZkEVM",
+      "name": "OnlyXagonZkEVM",
       "type": "error"
     },
     {
@@ -569,7 +569,7 @@
       "name": "globalExitRootManager",
       "outputs": [
         {
-          "internalType": "contract IBasePolygonZkEVMGlobalExitRoot",
+          "internalType": "contract IBaseXagonZkEVMGlobalExitRoot",
           "name": "",
           "type": "address"
         }
@@ -585,13 +585,13 @@
           "type": "uint32"
         },
         {
-          "internalType": "contract IBasePolygonZkEVMGlobalExitRoot",
+          "internalType": "contract IBaseXagonZkEVMGlobalExitRoot",
           "name": "_globalExitRootManager",
           "type": "address"
         },
         {
           "internalType": "address",
-          "name": "_polygonZkEVMaddress",
+          "name": "_xagonZkEVMaddress",
           "type": "address"
         }
       ],
@@ -686,7 +686,7 @@
     },
     {
       "inputs": [],
-      "name": "polygonZkEVMaddress",
+      "name": "xagonZkEVMaddress",
       "outputs": [
         {
           "internalType": "address",

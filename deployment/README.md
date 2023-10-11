@@ -23,7 +23,7 @@ cp deploy_parameters.json.example deploy_parameters.json
 Fill created `deploy_parameters.json` with appropiate parameters.
 See below for more information about the `deploy_parameters.json`
 
-The first step is deploying and verifying the `PolygonZkEVMDeployer`, this will be the factory for deterministic contracts, the address of the contracts will depend on the `salt` and the `initialZkEVMDeployerOwner`
+The first step is deploying and verifying the `XagonZkEVMDeployer`, this will be the factory for deterministic contracts, the address of the contracts will depend on the `salt` and the `initialZkEVMDeployerOwner`
 
 This contrat is deployed using a keyless deployment, therefore the gasPrice is hardcoded.
 The value is on `100 gweis`, if it's necessary to update it go to `helpers/deployment-helpers.js` and update the `gasPriceKeylessDeployment` constant.
@@ -65,14 +65,14 @@ A new folder will be created witth the following name `deployments/${network}_$(
 - `trustedAggregatorTimeout`: uint64, If a sequence is not verified in this timeout everyone can verify it
 - `pendingStateTimeout`: uint64, Once a pending state exceeds this timeout it can be consolidated
 - `forkID`: uint64, Fork ID of the zkEVM, indicates the prover (zkROM/executor) version
-- `admin`:address, Admin address, can adjust PolygonZkEVM parameters or stop the emergency state
-- `zkEVMOwner`: address, Able to put the PolygonZkEVM into emergency state (kill switch)
+- `admin`:address, Admin address, can adjust XagonZkEVM parameters or stop the emergency state
+- `zkEVMOwner`: address, Able to put the XagonZkEVM into emergency state (kill switch)
 - `timelockAddress`: address, Timelock owner address, able to send start an upgradability process via timelock
 - `minDelayTimelock`: number, Minimum timelock delay,
-- `salt`: bytes32, Salt used in `PolygonZkEVMDeployer` to deploy deterministic contracts, such as the PolygonZkEVMBridge
-- `initialZkEVMDeployerOwner`: address, Initial owner of the `PolygonZkEVMDeployer`
+- `salt`: bytes32, Salt used in `XagonZkEVMDeployer` to deploy deterministic contracts, such as the XagonZkEVMBridge
+- `initialZkEVMDeployerOwner`: address, Initial owner of the `XagonZkEVMDeployer`
 - `maticTokenAddress`: address, Matic token address, only if deploy on testnet can be left blank and will fullfilled by the scripts.
-- `zkEVMDeployerAddress`: address, Address of the `PolygonZkEVMDeployer`. Can be left blank, will be fullfilled automatically with the `deploy:deployer:ZkEVM:goerli` script.
+- `zkEVMDeployerAddress`: address, Address of the `XagonZkEVMDeployer`. Can be left blank, will be fullfilled automatically with the `deploy:deployer:ZkEVM:goerli` script.
 
 ### Optional Parameters
 

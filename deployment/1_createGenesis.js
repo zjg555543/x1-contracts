@@ -12,9 +12,9 @@ process.env.MNEMONIC = argv.test ? DEFAULT_MNEMONIC : process.env.MNEMONIC;
 const { ethers, upgrades } = require('hardhat');
 const {
     MemDB, ZkEVMDB, getPoseidon, smtUtils,
-} = require('@0xpolygonhermez/zkevm-commonjs');
+} = require('@0xxagonhermez/zkevm-commonjs');
 
-const { deployPolygonZkEVMDeployer, create2Deployment, getCreate2Address } = require('./helpers/deployment-helpers');
+const { deployXagonZkEVMDeployer, create2Deployment, getCreate2Address } = require('./helpers/deployment-helpers');
 
 const deployParametersPath = argv.input ? argv.input : './deploy_parameters.json';
 const deployParameters = require(deployParametersPath);
@@ -74,8 +74,8 @@ async function main() {
     await ethers.provider.send('hardhat_setBalance', [initialZkEVMDeployerOwner, '0xffffffffffffffff']); // 18 ethers aprox
     const deployer = await ethers.getSigner(initialZkEVMDeployerOwner);
 
-    // Deploy PolygonZkEVMDeployer if is not deployed already
-    const [zkEVMDeployerContract, keylessDeployer] = await deployPolygonZkEVMDeployer(initialZkEVMDeployerOwner, deployer);
+    // Deploy XagonZkEVMDeployer if is not deployed already
+    const [zkEVMDeployerContract, keylessDeployer] = await deployXagonZkEVMDeployer(initialZkEVMDeployerOwner, deployer);
 
     /*
      * Deploy Bridge
@@ -92,9 +92,9 @@ async function main() {
         // deploy with ether as gasToken
         balanceBrige = '200000000000000000000000000';
 
-        // Deploy implementation PolygonZkEVMBridge
-        const polygonZkEVMBridgeFactory = await ethers.getContractFactory('PolygonZkEVMBridge', deployer);
-        const deployTransactionBridge = (polygonZkEVMBridgeFactory.getDeployTransaction()).data;
+        // Deploy implementation XagonZkEVMBridge
+        const xagonZkEVMBridgeFactory = await ethers.getContractFactory('XagonZkEVMBridge', deployer);
+        const deployTransactionBridge = (xagonZkEVMBridgeFactory.getDeployTransaction()).data;
         // Mandatory to override the gasLimit since the estimation with create are mess up D:
         const overrideGasLimit = ethers.BigNumber.from(5500000);
         [bridgeImplementationAddress] = await create2Deployment(
@@ -119,7 +119,7 @@ async function main() {
             initializeEmptyDataProxy,
         )).data;
 
-        const dataCallProxy = polygonZkEVMBridgeFactory.interface.encodeFunctionData(
+        const dataCallProxy = xagonZkEVMBridgeFactory.interface.encodeFunctionData(
             'initialize',
             [
                 networkIDL2,
@@ -131,7 +131,7 @@ async function main() {
         finalBridgeProxyAddress = proxyBridgeAddress;
 
         // Import OZ manifest the deployed contracts, its enough to import just the proyx, the rest are imported automatically ( admin/impl)
-        await upgrades.forceImport(proxyBridgeAddress, polygonZkEVMBridgeFactory, 'transparent');
+        await upgrades.forceImport(proxyBridgeAddress, xagonZkEVMBridgeFactory, 'transparent');
     } else {
         // deploy token as gasToken
         balanceBrige = maxUint256;
@@ -139,8 +139,8 @@ async function main() {
         // Get L1 address
 
         // get bridge impl
-        const polygonZkEVML1BridgeFactory = await ethers.getContractFactory('PolygonZkEVMBridge', deployer);
-        const deployTransactionBridgeL1 = (polygonZkEVML1BridgeFactory.getDeployTransaction()).data;
+        const xagonZkEVML1BridgeFactory = await ethers.getContractFactory('XagonZkEVMBridge', deployer);
+        const deployTransactionBridgeL1 = (xagonZkEVML1BridgeFactory.getDeployTransaction()).data;
         finalBridgeImplAddress = getCreate2Address(
             zkEVMDeployerContract,
             salt,
@@ -162,9 +162,9 @@ async function main() {
         const WETHToken = await WETHzkEVMFactory.deploy(finalBridgeProxyAddress);
         await WETHToken.deployed();
 
-        // Deploy implementation PolygonZkEVMBridge
-        const polygonZkEVMBridgeFactory = await ethers.getContractFactory('PolygonZkEVMBridgeL2', deployer);
-        const deployTransactionBridge = (polygonZkEVMBridgeFactory.getDeployTransaction()).data;
+        // Deploy implementation XagonZkEVMBridge
+        const xagonZkEVMBridgeFactory = await ethers.getContractFactory('XagonZkEVMBridgeL2', deployer);
+        const deployTransactionBridge = (xagonZkEVMBridgeFactory.getDeployTransaction()).data;
         // Mandatory to override the gasLimit since the estimation with create are mess up D:
         const overrideGasLimit = ethers.BigNumber.from(5500000);
         [bridgeImplementationAddress] = await create2Deployment(
@@ -188,7 +188,7 @@ async function main() {
             initializeEmptyDataProxy,
         )).data;
 
-        const dataCallProxy = polygonZkEVMBridgeFactory.interface.encodeFunctionData(
+        const dataCallProxy = xagonZkEVMBridgeFactory.interface.encodeFunctionData(
             'initialize',
             [
                 networkIDL2,
@@ -202,7 +202,7 @@ async function main() {
         [proxyBridgeAddress] = await create2Deployment(zkEVMDeployerContract, salt, deployTransactionProxy, dataCallProxy, deployer);
 
         // Import OZ manifest the deployed contracts, its enough to import just the proyx, the rest are imported automatically ( admin/impl)
-        await upgrades.forceImport(proxyBridgeAddress, polygonZkEVMBridgeFactory, 'transparent');
+        await upgrades.forceImport(proxyBridgeAddress, xagonZkEVMBridgeFactory, 'transparent');
 
         // Update genesis with the WETH token
         const WETHInfo = await getAddressInfo(WETHToken.address);
@@ -219,11 +219,11 @@ async function main() {
     /*
      *Deployment Global exit root manager
      */
-    const PolygonZkEVMGlobalExitRootL2Factory = await ethers.getContractFactory('PolygonZkEVMGlobalExitRootL2', deployer);
-    let polygonZkEVMGlobalExitRootL2;
+    const XagonZkEVMGlobalExitRootL2Factory = await ethers.getContractFactory('XagonZkEVMGlobalExitRootL2', deployer);
+    let xagonZkEVMGlobalExitRootL2;
     for (let i = 0; i < attemptsDeployProxy; i++) {
         try {
-            polygonZkEVMGlobalExitRootL2 = await upgrades.deployProxy(PolygonZkEVMGlobalExitRootL2Factory, [], {
+            xagonZkEVMGlobalExitRootL2 = await upgrades.deployProxy(XagonZkEVMGlobalExitRootL2Factory, [], {
                 initializer: false,
                 constructorArgs: [finalBridgeProxyAddress],
                 unsafeAllow: ['constructor', 'state-variable-immutable'],
@@ -231,20 +231,20 @@ async function main() {
             break;
         } catch (error) {
             console.log(`attempt ${i}`);
-            console.log('upgrades.deployProxy of polygonZkEVMGlobalExitRootL2 ', error.message);
+            console.log('upgrades.deployProxy of xagonZkEVMGlobalExitRootL2 ', error.message);
         }
 
         // reach limits of attempts
         if (i + 1 === attemptsDeployProxy) {
-            throw new Error('polygonZkEVMGlobalExitRootL2 contract has not been deployed');
+            throw new Error('xagonZkEVMGlobalExitRootL2 contract has not been deployed');
         }
     }
 
     // Assert admin address
-    expect(await upgrades.erc1967.getAdminAddress(polygonZkEVMGlobalExitRootL2.address)).to.be.equal(proxyAdminAddress);
+    expect(await upgrades.erc1967.getAdminAddress(xagonZkEVMGlobalExitRootL2.address)).to.be.equal(proxyAdminAddress);
     expect(await upgrades.erc1967.getAdminAddress(proxyBridgeAddress)).to.be.equal(proxyAdminAddress);
 
-    const timelockContractFactory = await ethers.getContractFactory('PolygonZkEVMTimelock', deployer);
+    const timelockContractFactory = await ethers.getContractFactory('XagonZkEVMTimelock', deployer);
     const timelockContract = await timelockContractFactory.deploy(
         minDelayTimelock,
         [timelockAddress],
@@ -263,7 +263,7 @@ async function main() {
     // ZKEVMDeployer
     const zkEVMDeployerInfo = await getAddressInfo(zkEVMDeployerContract.address);
     genesis.push({
-        contractName: 'PolygonZkEVMDeployer',
+        contractName: 'XagonZkEVMDeployer',
         balance: '0',
         nonce: zkEVMDeployerInfo.nonce.toString(),
         address: zkEVMDeployerContract.address,
@@ -285,7 +285,7 @@ async function main() {
     // Bridge implementation
     const bridgeImplementationInfo = await getAddressInfo(bridgeImplementationAddress);
     genesis.push({
-        contractName: 'PolygonZkEVMBridge implementation',
+        contractName: 'XagonZkEVMBridge implementation',
         balance: '0',
         nonce: bridgeImplementationInfo.nonce.toString(),
         address: finalBridgeImplAddress, // override address
@@ -300,7 +300,7 @@ async function main() {
     bridgeProxyInfo.storage[_IMPLEMENTATION_SLOT] = ethers.utils.hexZeroPad(finalBridgeImplAddress, 32);
 
     genesis.push({
-        contractName: 'PolygonZkEVMBridge proxy',
+        contractName: 'XagonZkEVMBridge proxy',
         balance: balanceBrige,
         nonce: bridgeProxyInfo.nonce.toString(),
         address: finalBridgeProxyAddress, // override adddress
@@ -308,11 +308,11 @@ async function main() {
         storage: bridgeProxyInfo.storage,
     });
 
-    // polygonZkEVMGlobalExitRootL2 implementation
-    const implGlobalExitRootL2 = await upgrades.erc1967.getImplementationAddress(polygonZkEVMGlobalExitRootL2.address);
+    // xagonZkEVMGlobalExitRootL2 implementation
+    const implGlobalExitRootL2 = await upgrades.erc1967.getImplementationAddress(xagonZkEVMGlobalExitRootL2.address);
     const implGlobalExitRootL2Info = await getAddressInfo(implGlobalExitRootL2);
     genesis.push({
-        contractName: 'PolygonZkEVMGlobalExitRootL2 implementation',
+        contractName: 'XagonZkEVMGlobalExitRootL2 implementation',
         balance: '0',
         nonce: implGlobalExitRootL2Info.nonce.toString(),
         address: implGlobalExitRootL2,
@@ -320,10 +320,10 @@ async function main() {
         // storage: implGlobalExitRootL2Info.storage, , implementation do not have storage
     });
 
-    // polygonZkEVMGlobalExitRootL2 proxy
-    const proxyGlobalExitRootL2Info = await getAddressInfo(polygonZkEVMGlobalExitRootL2.address);
+    // xagonZkEVMGlobalExitRootL2 proxy
+    const proxyGlobalExitRootL2Info = await getAddressInfo(xagonZkEVMGlobalExitRootL2.address);
     genesis.push({
-        contractName: 'PolygonZkEVMGlobalExitRootL2 proxy',
+        contractName: 'XagonZkEVMGlobalExitRootL2 proxy',
         balance: '0',
         nonce: proxyGlobalExitRootL2Info.nonce.toString(),
         address: globalExitRootL2Address, // Override address!
@@ -369,7 +369,7 @@ async function main() {
     }
 
     genesis.push({
-        contractName: 'PolygonZkEVMTimelock',
+        contractName: 'XagonZkEVMTimelock',
         balance: '0',
         nonce: timelockInfo.nonce.toString(),
         address: timelockContract.address,

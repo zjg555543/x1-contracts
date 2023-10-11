@@ -49,31 +49,31 @@ async function main() {
 
     // Upgrade zkevm
     for (const upgrade of upgradeParameters.upgrades) {
-        const proxyPolygonAddress = upgrade.address;
-        const polygonZkEVMFactory = await ethers.getContractFactory(upgrade.contractName, deployer);
+        const proxyXagonAddress = upgrade.address;
+        const xagonZkEVMFactory = await ethers.getContractFactory(upgrade.contractName, deployer);
 
-        let newImplPolygonAddress;
+        let newImplXagonAddress;
 
         if (upgrade.constructorArgs) {
-            newImplPolygonAddress = await upgrades.prepareUpgrade(
-                proxyPolygonAddress,
-                polygonZkEVMFactory,
+            newImplXagonAddress = await upgrades.prepareUpgrade(
+                proxyXagonAddress,
+                xagonZkEVMFactory,
                 {
                     constructorArgs: upgrade.constructorArgs,
                     unsafeAllow: ['constructor', 'state-variable-immutable'],
                 },
             );
 
-            console.log({ newImplPolygonAddress });
+            console.log({ newImplXagonAddress });
             console.log('you can verify the new impl address with:');
-            console.log(`npx hardhat verify --constructor-args upgrade/arguments.js ${newImplPolygonAddress} --network ${process.env.HARDHAT_NETWORK}\n`);
+            console.log(`npx hardhat verify --constructor-args upgrade/arguments.js ${newImplXagonAddress} --network ${process.env.HARDHAT_NETWORK}\n`);
             console.log('Copy the following constructor arguments on: upgrade/arguments.js \n', upgrade.constructorArgs);
         } else {
-            newImplPolygonAddress = await upgrades.prepareUpgrade(proxyPolygonAddress, polygonZkEVMFactory);
+            newImplXagonAddress = await upgrades.prepareUpgrade(proxyXagonAddress, xagonZkEVMFactory);
 
-            console.log({ newImplPolygonAddress });
+            console.log({ newImplXagonAddress });
             console.log('you can verify the new impl address with:');
-            console.log(`npx hardhat verify ${newImplPolygonAddress} --network ${process.env.HARDHAT_NETWORK}`);
+            console.log(`npx hardhat verify ${newImplXagonAddress} --network ${process.env.HARDHAT_NETWORK}`);
         }
 
         // Use timelock
@@ -87,9 +87,9 @@ async function main() {
                 proxyAdmin.interface.encodeFunctionData(
                     'upgradeAndCall',
                     [
-                        proxyPolygonAddress,
-                        newImplPolygonAddress,
-                        polygonZkEVMFactory.interface.encodeFunctionData(
+                        proxyXagonAddress,
+                        newImplXagonAddress,
+                        xagonZkEVMFactory.interface.encodeFunctionData(
                             upgrade.callAfterUpgrade.functionName,
                             upgrade.callAfterUpgrade.arguments,
                         ),
@@ -104,8 +104,8 @@ async function main() {
                 0, // value
                 proxyAdmin.interface.encodeFunctionData(
                     'upgrade',
-                    [proxyPolygonAddress,
-                        newImplPolygonAddress],
+                    [proxyXagonAddress,
+                        newImplXagonAddress],
                 ),
                 ethers.constants.HashZero, // predecesoor
                 salt, // salt
@@ -113,7 +113,7 @@ async function main() {
         }
 
         // Timelock operations
-        const TimelockFactory = await ethers.getContractFactory('PolygonZkEVMTimelock', deployer);
+        const TimelockFactory = await ethers.getContractFactory('XagonZkEVMTimelock', deployer);
         const minDelay = upgradeParameters.timelockMinDelay || 0;
 
         // Schedule operation

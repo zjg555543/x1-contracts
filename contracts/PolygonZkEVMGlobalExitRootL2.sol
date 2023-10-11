@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0
 
 pragma solidity 0.8.20;
-import "./interfaces/IBasePolygonZkEVMGlobalExitRoot.sol";
+import "./interfaces/IBaseXagonZkEVMGlobalExitRoot.sol";
 
 /**
  * Contract responsible for managing the exit roots for the L2 and global exit roots
  * The special zkRom variables will be accessed and updated directly by the zkRom
  */
-contract PolygonZkEVMGlobalExitRootL2 is IBasePolygonZkEVMGlobalExitRoot {
+contract XagonZkEVMGlobalExitRootL2 is IBaseXagonZkEVMGlobalExitRoot {
     /////////////////////////////
     // Special zkRom variables
     ////////////////////////////
@@ -16,7 +16,7 @@ contract PolygonZkEVMGlobalExitRootL2 is IBasePolygonZkEVMGlobalExitRoot {
     // Note this variable is updated only by the zkRom
     mapping(bytes32 => uint256) public globalExitRootMap;
 
-    // Rollup exit root will be updated for every PolygonZkEVMBridge call
+    // Rollup exit root will be updated for every XagonZkEVMBridge call
     // Note this variable will be readed by the zkRom
     bytes32 public lastRollupExitRoot;
 
@@ -24,11 +24,11 @@ contract PolygonZkEVMGlobalExitRootL2 is IBasePolygonZkEVMGlobalExitRoot {
     // Regular variables
     ///////////////////
 
-    // PolygonZkEVM Bridge address
+    // XagonZkEVM Bridge address
     address public immutable bridgeAddress;
 
     /**
-     * @param _bridgeAddress PolygonZkEVMBridge contract address
+     * @param _bridgeAddress XagonZkEVMBridge contract address
      */
     constructor(address _bridgeAddress) {
         bridgeAddress = _bridgeAddress;

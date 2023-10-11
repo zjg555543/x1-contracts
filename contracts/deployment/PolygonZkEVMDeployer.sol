@@ -6,9 +6,9 @@ import "@openzeppelin/contracts/utils/Create2.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
 /**
- * Contract responsible for deploying deterministic address contracts related with the PolygonZkEVM
+ * Contract responsible for deploying deterministic address contracts related with the XagonZkEVM
  */
-contract PolygonZkEVMDeployer is Ownable {
+contract XagonZkEVMDeployer is Ownable {
     /**
      * @param _owner Owner
      */

@@ -5,21 +5,21 @@ pragma solidity 0.8.20;
 import "../lib/DepositContract.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "../lib/TokenWrapped.sol";
-import "../interfaces/IBasePolygonZkEVMGlobalExitRoot.sol";
+import "../interfaces/IBaseXagonZkEVMGlobalExitRoot.sol";
 import "../interfaces/IBridgeMessageReceiver.sol";
-import "../interfaces/IPolygonZkEVMBridgeL2.sol";
+import "../interfaces/IXagonZkEVMBridgeL2.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "../lib/EmergencyManager.sol";
 import "../lib/GlobalExitRootLib.sol";
 
 /**
- * PolygonZkEVMBridge that will be deployed on both networks Ethereum and Polygon zkEVM
+ * XagonZkEVMBridge that will be deployed on both networks Ethereum and Xagon zkEVM
  * Contract responsible to manage the token interactions with other networks
  */
-contract PolygonZkEVMBridgeL2 is
+contract XagonZkEVMBridgeL2 is
     DepositContract,
     EmergencyManager,
-    IPolygonZkEVMBridgeL2
+    IXagonZkEVMBridgeL2
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -51,7 +51,7 @@ contract PolygonZkEVMBridgeL2 is
     uint32 public networkID;
 
     // Global Exit Root address
-    IBasePolygonZkEVMGlobalExitRoot public globalExitRootManager;
+    IBaseXagonZkEVMGlobalExitRoot public globalExitRootManager;
 
     // Last updated deposit count to the global exit root manager
     uint32 public lastUpdatedDepositCount;
@@ -65,8 +65,8 @@ contract PolygonZkEVMBridgeL2 is
     // Wrapped token Address --> Origin token information
     mapping(address => TokenInformation) public wrappedTokenToTokenInfo;
 
-    // PolygonZkEVM address
-    address public polygonZkEVMaddress;
+    // XagonZkEVM address
+    address public xagonZkEVMaddress;
 
     // Native address
     address public gasTokenAddress;
@@ -80,21 +80,21 @@ contract PolygonZkEVMBridgeL2 is
     /**
      * @param _networkID networkID
      * @param _globalExitRootManager global exit root manager address
-     * @param _polygonZkEVMaddress polygonZkEVM address
-     * @notice The value of `_polygonZkEVMaddress` on the L2 deployment of the contract will be address(0), so
+     * @param _xagonZkEVMaddress xagonZkEVM address
+     * @notice The value of `_xagonZkEVMaddress` on the L2 deployment of the contract will be address(0), so
      * emergency state is not possible for the L2 deployment of the bridge, intentionally
      */
     function initialize(
         uint32 _networkID,
-        IBasePolygonZkEVMGlobalExitRoot _globalExitRootManager,
-        address _polygonZkEVMaddress,
+        IBaseXagonZkEVMGlobalExitRoot _globalExitRootManager,
+        address _xagonZkEVMaddress,
         address _gasTokenAddress,
         uint32 _gasTokenNetwork,
         TokenWrapped _WETHToken
     ) external virtual initializer {
         networkID = _networkID;
         globalExitRootManager = _globalExitRootManager;
-        polygonZkEVMaddress = _polygonZkEVMaddress;
+        xagonZkEVMaddress = _xagonZkEVMaddress;
 
         // Set gas token
         gasTokenAddress = _gasTokenAddress;
@@ -107,9 +107,9 @@ contract PolygonZkEVMBridgeL2 is
         __ReentrancyGuard_init();
     }
 
-    modifier onlyPolygonZkEVM() {
-        if (polygonZkEVMaddress != msg.sender) {
-            revert OnlyPolygonZkEVM();
+    modifier onlyXagonZkEVM() {
+        if (xagonZkEVMaddress != msg.sender) {
+            revert OnlyXagonZkEVM();
         }
         _;
     }
@@ -588,17 +588,17 @@ contract PolygonZkEVMBridgeL2 is
 
     /**
      * @notice Function to activate the emergency state
-     " Only can be called by the Polygon ZK-EVM in extreme situations
+     " Only can be called by the Xagon ZK-EVM in extreme situations
      */
-    function activateEmergencyState() external onlyPolygonZkEVM {
+    function activateEmergencyState() external onlyXagonZkEVM {
         _activateEmergencyState();
     }
 
     /**
      * @notice Function to deactivate the emergency state
-     " Only can be called by the Polygon ZK-EVM
+     " Only can be called by the Xagon ZK-EVM
      */
-    function deactivateEmergencyState() external onlyPolygonZkEVM {
+    function deactivateEmergencyState() external onlyXagonZkEVM {
         _deactivateEmergencyState();
     }
 

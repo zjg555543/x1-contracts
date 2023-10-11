@@ -2,17 +2,17 @@
 const { expect } = require('chai');
 const { ethers, upgrades } = require('hardhat');
 
-describe('Polygon ZK-EVM TestnetV2', () => {
+describe('Xagon ZK-EVM TestnetV2', () => {
     let deployer;
     let trustedAggregator;
     let trustedSequencer;
     let admin;
 
     let verifierContract;
-    let polygonZkEVMBridgeContract;
-    let polygonZkEVMContract;
+    let xagonZkEVMBridgeContract;
+    let xagonZkEVMContract;
     let maticTokenContract;
-    let polygonZkEVMGlobalExitRoot;
+    let xagonZkEVMGlobalExitRoot;
 
     const maticTokenName = 'Matic Token';
     const maticTokenSymbol = 'MATIC';
@@ -61,43 +61,43 @@ describe('Polygon ZK-EVM TestnetV2', () => {
             firstDeployment = false;
         }
         const nonceProxyBridge = Number((await ethers.provider.getTransactionCount(deployer.address))) + (firstDeployment ? 3 : 2);
-        const nonceProxyZkevm = nonceProxyBridge + 2; // Always have to redeploy impl since the polygonZkEVMGlobalExitRoot address changes
+        const nonceProxyZkevm = nonceProxyBridge + 2; // Always have to redeploy impl since the xagonZkEVMGlobalExitRoot address changes
 
         const precalculateBridgeAddress = ethers.utils.getContractAddress({ from: deployer.address, nonce: nonceProxyBridge });
         const precalculateZkevmAddress = ethers.utils.getContractAddress({ from: deployer.address, nonce: nonceProxyZkevm });
         firstDeployment = false;
 
-        const PolygonZkEVMGlobalExitRootFactory = await ethers.getContractFactory('PolygonZkEVMGlobalExitRoot');
-        polygonZkEVMGlobalExitRoot = await upgrades.deployProxy(PolygonZkEVMGlobalExitRootFactory, [], {
+        const XagonZkEVMGlobalExitRootFactory = await ethers.getContractFactory('XagonZkEVMGlobalExitRoot');
+        xagonZkEVMGlobalExitRoot = await upgrades.deployProxy(XagonZkEVMGlobalExitRootFactory, [], {
             initializer: false,
             constructorArgs: [precalculateZkevmAddress, precalculateBridgeAddress],
             unsafeAllow: ['constructor', 'state-variable-immutable'],
         });
 
-        // deploy PolygonZkEVMBridge
-        const polygonZkEVMBridgeFactory = await ethers.getContractFactory('PolygonZkEVMBridge');
-        polygonZkEVMBridgeContract = await upgrades.deployProxy(polygonZkEVMBridgeFactory, [], { initializer: false });
+        // deploy XagonZkEVMBridge
+        const xagonZkEVMBridgeFactory = await ethers.getContractFactory('XagonZkEVMBridge');
+        xagonZkEVMBridgeContract = await upgrades.deployProxy(xagonZkEVMBridgeFactory, [], { initializer: false });
 
-        // deploy PolygonZkEVMTestnet
-        const PolygonZkEVMFactory = await ethers.getContractFactory('PolygonZkEVMTestnetV2');
-        polygonZkEVMContract = await upgrades.deployProxy(PolygonZkEVMFactory, [], {
+        // deploy XagonZkEVMTestnet
+        const XagonZkEVMFactory = await ethers.getContractFactory('XagonZkEVMTestnetV2');
+        xagonZkEVMContract = await upgrades.deployProxy(XagonZkEVMFactory, [], {
             initializer: false,
             constructorArgs: [
-                polygonZkEVMGlobalExitRoot.address,
+                xagonZkEVMGlobalExitRoot.address,
                 maticTokenContract.address,
                 verifierContract.address,
-                polygonZkEVMBridgeContract.address,
+                xagonZkEVMBridgeContract.address,
                 chainID,
                 forkID,
             ],
             unsafeAllow: ['constructor', 'state-variable-immutable'],
         });
 
-        expect(precalculateBridgeAddress).to.be.equal(polygonZkEVMBridgeContract.address);
-        expect(precalculateZkevmAddress).to.be.equal(polygonZkEVMContract.address);
+        expect(precalculateBridgeAddress).to.be.equal(xagonZkEVMBridgeContract.address);
+        expect(precalculateZkevmAddress).to.be.equal(xagonZkEVMContract.address);
 
-        await polygonZkEVMBridgeContract.initialize(networkIDMainnet, polygonZkEVMGlobalExitRoot.address, polygonZkEVMContract.address);
-        await polygonZkEVMContract.initialize(
+        await xagonZkEVMBridgeContract.initialize(networkIDMainnet, xagonZkEVMGlobalExitRoot.address, xagonZkEVMContract.address);
+        await xagonZkEVMContract.initialize(
             {
                 admin: admin.address,
                 trustedSequencer: trustedSequencer.address,
@@ -116,7 +116,7 @@ describe('Polygon ZK-EVM TestnetV2', () => {
     });
 
     it('should check the constructor parameters', async () => {
-        expect(await polygonZkEVMContract.version()).to.be.equal(0);
+        expect(await xagonZkEVMContract.version()).to.be.equal(0);
     });
 
     it('should check updateVersion', async () => {
@@ -124,13 +124,13 @@ describe('Polygon ZK-EVM TestnetV2', () => {
 
         /*
          * const lastVerifiedBatch = 0;
-         * await expect(polygonZkEVMContract.updateVersion(newVersionString))
-         *     .to.emit(polygonZkEVMContract, 'UpdateZkEVMVersion').withArgs(lastVerifiedBatch, forkID, newVersionString);
+         * await expect(xagonZkEVMContract.updateVersion(newVersionString))
+         *     .to.emit(xagonZkEVMContract, 'UpdateZkEVMVersion').withArgs(lastVerifiedBatch, forkID, newVersionString);
          */
 
-        await expect(polygonZkEVMContract.updateVersion(newVersionString))
+        await expect(xagonZkEVMContract.updateVersion(newVersionString))
             .to.be.revertedWith('VersionAlreadyUpdated');
 
-        // expect(await polygonZkEVMContract.version()).to.be.equal(1);
+        // expect(await xagonZkEVMContract.version()).to.be.equal(1);
     });
 });

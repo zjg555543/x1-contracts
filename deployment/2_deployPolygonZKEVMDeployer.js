@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
-const { deployPolygonZkEVMDeployer } = require('./helpers/deployment-helpers');
+const { deployXagonZkEVMDeployer } = require('./helpers/deployment-helpers');
 
 const pathDeployParameters = path.join(__dirname, './deploy_parameters.json');
 const deployParameters = require('./deploy_parameters.json');
@@ -56,14 +56,14 @@ async function main() {
         throw new Error('Missing parameter: initialZkEVMDeployerOwner');
     }
 
-    // Deploy PolygonZkEVMDeployer if is not deployed already using keyless deployment
-    const [zkEVMDeployerContract, keylessDeployer] = await deployPolygonZkEVMDeployer(initialZkEVMDeployerOwner, deployer);
+    // Deploy XagonZkEVMDeployer if is not deployed already using keyless deployment
+    const [zkEVMDeployerContract, keylessDeployer] = await deployXagonZkEVMDeployer(initialZkEVMDeployerOwner, deployer);
     if (keylessDeployer === ethers.constants.AddressZero) {
         console.log('#######################\n');
-        console.log('polygonZkEVMDeployer already deployed on: ', zkEVMDeployerContract.address);
+        console.log('xagonZkEVMDeployer already deployed on: ', zkEVMDeployerContract.address);
     } else {
         console.log('#######################\n');
-        console.log('polygonZkEVMDeployer deployed on: ', zkEVMDeployerContract.address);
+        console.log('xagonZkEVMDeployer deployed on: ', zkEVMDeployerContract.address);
     }
 
     deployParameters.zkEVMDeployerAddress = zkEVMDeployerContract.address;

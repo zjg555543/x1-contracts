@@ -1,7 +1,7 @@
 {
  "realVerifier": true,
  "trustedSequencerURL": "https://zkevm-rpc.com/",
- "networkName": "polygon zkEVM",
+ "networkName": "xagon zkEVM",
  "version": "v1.1.0-fork.4",
  "trustedSequencer": "0x148Ee7dAF16574cD020aFa34CC658f8F3fbd2800",
  "chainID": 1101,

@@ -1,7 +1,7 @@
 {
   "_format": "hh-sol-artifact-1",
-  "contractName": "PolygonZkEVMTimelock",
-  "sourceName": "contracts/PolygonZkEVMTimelock.sol",
+  "contractName": "XagonZkEVMTimelock",
+  "sourceName": "contracts/XagonZkEVMTimelock.sol",
   "abi": [
     {
       "inputs": [
@@ -26,8 +26,8 @@
           "type": "address"
         },
         {
-          "internalType": "contract PolygonZkEVM",
-          "name": "_polygonZkEVM",
+          "internalType": "contract XagonZkEVM",
+          "name": "_xagonZkEVM",
           "type": "address"
         }
       ],
@@ -732,10 +732,10 @@
     },
     {
       "inputs": [],
-      "name": "polygonZkEVM",
+      "name": "xagonZkEVM",
       "outputs": [
         {
-          "internalType": "contract PolygonZkEVM",
+          "internalType": "contract XagonZkEVM",
           "name": "",
           "type": "address"
         }

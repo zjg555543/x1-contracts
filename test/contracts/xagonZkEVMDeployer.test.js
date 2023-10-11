@@ -2,7 +2,7 @@
 const { expect } = require('chai');
 const { ethers, upgrades } = require('hardhat');
 
-describe('Polygon ZK-EVM Deployer', () => {
+describe('Xagon ZK-EVM Deployer', () => {
     let deployer; let
         owner;
     let polgonZKEVMDeployerContract;
@@ -19,7 +19,7 @@ describe('Polygon ZK-EVM Deployer', () => {
 
         // deploy mock verifier
         const PolgonZKEVMDeployerFactory = await ethers.getContractFactory(
-            'PolygonZkEVMDeployer',
+            'XagonZkEVMDeployer',
         );
         polgonZKEVMDeployerContract = await PolgonZKEVMDeployerFactory.deploy(owner.address);
         await polgonZKEVMDeployerContract.deployed();
@@ -159,7 +159,7 @@ describe('Polygon ZK-EVM Deployer', () => {
 
     it('Test keyless deployment', async () => {
         const PolgonZKEVMDeployerFactory = await ethers.getContractFactory(
-            'PolygonZkEVMDeployer',
+            'XagonZkEVMDeployer',
         );
 
         const deployTxZKEVMDeployer = (PolgonZKEVMDeployerFactory.getDeployTransaction(
@@ -202,7 +202,7 @@ describe('Polygon ZK-EVM Deployer', () => {
     });
     it('Test Bridge deployment', async () => {
         const bridgeFactory = await ethers.getContractFactory(
-            'PolygonZkEVMBridge',
+            'XagonZkEVMBridge',
         );
 
         const salt = ethers.constants.HashZero;

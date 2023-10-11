@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 
-const { contractUtils } = require('@0xpolygonhermez/zkevm-commonjs');
+const { contractUtils } = require('@0xxagonhermez/zkevm-commonjs');
 
 const { generateSolidityInputs } = contractUtils;
 

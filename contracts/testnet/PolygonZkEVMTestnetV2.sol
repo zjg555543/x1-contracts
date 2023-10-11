@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity 0.8.20;
 
-import "../PolygonZkEVM.sol";
+import "../XagonZkEVM.sol";
 
 /**
  * Contract responsible for managing the state and the updates of the L2 network
  * This contract will NOT BE USED IN PRODUCTION, will be used only in testnet enviroment
  */
-contract PolygonZkEVMTestnetV2 is PolygonZkEVM {
+contract XagonZkEVMTestnetV2 is XagonZkEVM {
     // Indicates the current version
     uint256 public version;
 
@@ -19,14 +19,14 @@ contract PolygonZkEVMTestnetV2 is PolygonZkEVM {
      * @param _chainID L2 chainID
      */
     constructor(
-        IPolygonZkEVMGlobalExitRoot _globalExitRootManager,
+        IXagonZkEVMGlobalExitRoot _globalExitRootManager,
         IERC20Upgradeable _matic,
         IVerifierRollup _rollupVerifier,
-        IPolygonZkEVMBridge _bridgeAddress,
+        IXagonZkEVMBridge _bridgeAddress,
         uint64 _chainID,
         uint64 _forkID
     )
-        PolygonZkEVM(
+        XagonZkEVM(
             _globalExitRootManager,
             _matic,
             _rollupVerifier,
