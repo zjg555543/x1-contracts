@@ -1,6 +1,8 @@
 /* eslint-disable no-plusplus, no-await-in-loop */
 const { expect } = require('chai');
 const { ethers, upgrades } = require('hardhat');
+const { contractUtils } = require('@0xpolygonhermez/zkevm-commonjs');
+const { calculateBatchHashData } = contractUtils;
 
 describe('PolygonZkEVMUpgraded', () => {
     let deployer;

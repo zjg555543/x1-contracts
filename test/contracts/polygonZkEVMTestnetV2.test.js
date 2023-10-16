@@ -98,6 +98,7 @@ describe('Polygon ZK-EVM TestnetV2', () => {
                 maticTokenContract.address,
                 verifierContract.address,
                 polygonZkEVMBridgeContract.address,
+                dataCommitteeContract.address,
                 chainID,
                 forkID,
             ],
