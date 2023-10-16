@@ -10,7 +10,9 @@ This contract will NOT BE USED IN PRODUCTION, will be used only in testnet envir
     contract IERC20Upgradeable _matic,
     contract IVerifierRollup _rollupVerifier,
     contract IPolygonZkEVMBridge _bridgeAddress,
-    uint64 _chainID
+    contract IDataCommittee _dataCommitteeAddress,
+    uint64 _chainID,
+    uint64 _forkID
   ) public
 ```
 
@@ -22,7 +24,9 @@ This contract will NOT BE USED IN PRODUCTION, will be used only in testnet envir
 |`_matic` | contract IERC20Upgradeable | MATIC token address
 |`_rollupVerifier` | contract IVerifierRollup | Rollup verifier address
 |`_bridgeAddress` | contract IPolygonZkEVMBridge | Bridge address
+|`_dataCommitteeAddress` | contract IDataCommittee | Data committee address
 |`_chainID` | uint64 | L2 chainID
+|`_forkID` | uint64 | Fork Id
 
 ### clearStorage
 ```solidity
