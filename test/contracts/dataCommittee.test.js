@@ -159,8 +159,8 @@ describe('Polygon Data Committee', () => {
         const PolygonZkEVMBridgeFactory = await ethers.getContractFactory('PolygonZkEVMBridge');
         PolygonZkEVMBridgeContract = await upgrades.deployProxy(PolygonZkEVMBridgeFactory, [], { initializer: false });
 
-        // deploy ValidiumMock
-        const ValidiumFactory = await ethers.getContractFactory('ValidiumMock');
+        // deploy PolygonZkEVMMock
+        const ValidiumFactory = await ethers.getContractFactory('PolygonZkEVMMock');
         validiumContract = await upgrades.deployProxy(ValidiumFactory, [], {
             initializer: false,
             constructorArgs: [
