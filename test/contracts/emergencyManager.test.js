@@ -1,5 +1,7 @@
 const { expect } = require('chai');
 const { ethers, upgrades } = require('hardhat');
+const { contractUtils } = require('@0xpolygonhermez/zkevm-commonjs');
+const { calculateBatchHashData } = contractUtils;
 
 describe('Emergency mode test', () => {
     let deployer;
@@ -163,10 +165,18 @@ describe('Emergency mode test', () => {
 
         // Once in emergency state no sequenceBatches/forceBatches can be done
         const l2txData = '0x123456';
+        const transactionsHash = calculateBatchHashData(l2txData);
         const maticAmount = await polygonZkEVMContract.batchFee();
         const currentTimestamp = (await ethers.provider.getBlock()).timestamp;
 
         const sequence = {
+            transactionsHash,
+            globalExitRoot: ethers.constants.HashZero,
+            timestamp: ethers.BigNumber.from(currentTimestamp),
+            minForcedTimestamp: 0,
+        };
+
+        const sequenceFroce = {
             transactions: l2txData,
             globalExitRoot: ethers.constants.HashZero,
             timestamp: ethers.BigNumber.from(currentTimestamp),
@@ -178,7 +188,7 @@ describe('Emergency mode test', () => {
             .to.be.revertedWith('OnlyNotEmergencyState');
 
         // revert because emergency state
-        await expect(polygonZkEVMContract.sequenceForceBatches([sequence]))
+        await expect(polygonZkEVMContract.sequenceForceBatches([sequenceFroce]))
             .to.be.revertedWith('OnlyNotEmergencyState');
 
         // revert because emergency state
