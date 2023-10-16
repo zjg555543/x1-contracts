@@ -135,10 +135,10 @@ contract PolygonZkEVM is
     uint256 internal constant _MAX_BATCH_MULTIPLIER = 12;
 
     // Max batch fee value
-    uint256 internal constant _MAX_BATCH_FEE = 1000 ether;
+    uint256 internal  _maxBatchFee;
 
     // Min value batch fee
-    uint256 internal constant _MIN_BATCH_FEE = 1 gwei;
+    uint256 internal  _minBatchFee;
 
     // Goldilocks prime field
     uint256 internal constant _GOLDILOCKS_PRIME_FIELD = 0xFFFFFFFF00000001; // 2 ** 64 - 2 ** 32 + 1
@@ -439,11 +439,14 @@ contract PolygonZkEVM is
             .trustedAggregatorTimeout;
 
         // Constant deployment variables
-        batchFee = 0.1 ether; // 0.1 Matic
+        batchFee = 0;
         verifyBatchTimeTarget = 30 minutes;
         multiplierBatchFee = 1002;
         forceBatchTimeout = 5 days;
         isForcedBatchDisallowed = true;
+
+        _maxBatchFee = 1000 ether;
+        _minBatchFee = 0 gwei;
 
         // Initialize OZ contracts
         __Ownable_init_unchained();
@@ -529,7 +532,7 @@ contract PolygonZkEVM is
                 // Check forced data matches
                 bytes32 hashedForcedBatchData = keccak256(
                     abi.encodePacked(
-                        currentTransactionsHash,
+                        currentBatch.transactionsHash,
                         currentBatch.globalExitRoot,
                         currentBatch.minForcedTimestamp
                     )
@@ -562,12 +565,12 @@ contract PolygonZkEVM is
                     revert GlobalExitRootNotExist();
                 }
 
-                if (
-                    currentBatch.transactions.length >
-                    _MAX_TRANSACTIONS_BYTE_LENGTH
-                ) {
-                    revert TransactionsLengthAboveMax();
-                }
+                // if (
+                //     currentBatch.transactions.length >
+                //     _MAX_TRANSACTIONS_BYTE_LENGTH
+                // ) {
+                //     revert TransactionsLengthAboveMax();
+                // }
             }
 
             // Check Batch timestamps are correct
@@ -582,7 +585,7 @@ contract PolygonZkEVM is
             currentAccInputHash = keccak256(
                 abi.encodePacked(
                     currentAccInputHash,
-                    currentTransactionsHash,
+                    currentBatch.transactionsHash,
                     currentBatch.globalExitRoot,
                     currentBatch.timestamp,
                     l2Coinbase
@@ -680,7 +683,7 @@ contract PolygonZkEVM is
         );
 
         // Update batch fees
-        _updateBatchFee(finalNewBatch);
+        if (batchFee != 0) _updateBatchFee(finalNewBatch);
 
         if (pendingStateTimeout == 0) {
             // Consolidate state
@@ -832,6 +835,8 @@ contract PolygonZkEVM is
         if (!rollupVerifier.verifyProof(proof, [inputSnark])) {
             revert InvalidProof();
         }
+
+        if (batchFee == 0) return;
 
         // Get MATIC reward
         matic.safeTransfer(
@@ -1010,10 +1015,10 @@ contract PolygonZkEVM is
         }
 
         // Batch fee must remain inside a range
-        if (batchFee > _MAX_BATCH_FEE) {
-            batchFee = _MAX_BATCH_FEE;
-        } else if (batchFee < _MIN_BATCH_FEE) {
-            batchFee = _MIN_BATCH_FEE;
+        if (batchFee > _maxBatchFee) {
+            batchFee = _maxBatchFee;
+        } else if (batchFee <= _minBatchFee) {
+            batchFee = _minBatchFee;
         }
     }
 
@@ -1036,6 +1041,10 @@ contract PolygonZkEVM is
     ) public isForceBatchAllowed ifNotEmergencyState {
         // Calculate matic collateral
         uint256 maticFee = getForcedBatchFee();
+
+        if (maticFee == 0){
+           revert ForceBatchFeeIsZero();
+        }
 
         if (maticFee > maticAmount) {
             revert NotEnoughMaticAmount();
@@ -1568,6 +1577,33 @@ contract PolygonZkEVM is
             }
         }
         _activateEmergencyState();
+    }
+
+    /**
+     * @notice Function to set the batch fee
+     * @param newBatchFee New batch fee
+     */
+    function setBatchFee(
+        uint16 newBatchFee
+    ) external onlyAdmin {
+        if (newBatchFee < _minBatchFee || newBatchFee > _maxBatchFee) {
+            revert InvalidRangeBatchFee();
+        }
+
+        batchFee = newBatchFee;
+    }
+
+    /**
+     * @notice Function to set the batch fee range
+     * @param newMinBatchFee  New min batch fee
+     * @param newMaxBatchFee  New max batch fee
+     */
+    function setBatchFeeRange(
+        uint16 newMinBatchFee,
+        uint16 newMaxBatchFee
+    ) external onlyAdmin {
+        _minBatchFee = newMinBatchFee;
+        _maxBatchFee = newMaxBatchFee;
     }
 
     /**
