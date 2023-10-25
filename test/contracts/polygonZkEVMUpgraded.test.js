@@ -244,9 +244,8 @@ describe('PolygonZkEVMUpgraded', () => {
         expect(await polygonZkEVMContract.trustedSequencerURL()).to.be.equal(urlSequencer);
         expect(await polygonZkEVMContract.networkName()).to.be.equal(networkName);
 
-        expect(await polygonZkEVMContract.batchFee()).to.be.equal(ethers.utils.parseEther('0.1'));
-        expect(await polygonZkEVMContract.batchFee()).to.be.equal(ethers.utils.parseEther('0.1'));
-        expect(await polygonZkEVMContract.getForcedBatchFee()).to.be.equal(ethers.utils.parseEther('10'));
+        expect(await polygonZkEVMContract.batchFee()).to.be.equal(ethers.utils.parseEther('0.0'));
+        expect(await polygonZkEVMContract.getForcedBatchFee()).to.be.equal(ethers.utils.parseEther('0'));
 
         expect(await polygonZkEVMContract.forceBatchTimeout()).to.be.equal(FORCE_BATCH_TIMEOUT);
         expect(await polygonZkEVMContract.isForcedBatchDisallowed()).to.be.equal(true);
@@ -259,7 +258,7 @@ describe('PolygonZkEVMUpgraded', () => {
         const batchesForSequence = 5;
         const sequence = {
             transactions: l2txData,
-            transactionsHash: ethers.utils.formatBytes32String("0"),
+            transactionsHash: ethers.utils.formatBytes32String('0'),
             globalExitRoot: ethers.constants.HashZero,
             timestamp: currentTimestamp,
             minForcedTimestamp: 0,
@@ -458,7 +457,7 @@ describe('PolygonZkEVMUpgraded', () => {
         const batchesForSequence = 5;
         const sequence = {
             transactions: l2txData,
-            transactionsHash: ethers.utils.formatBytes32String("0"),
+            transactionsHash: ethers.utils.formatBytes32String('0'),
             globalExitRoot: ethers.constants.HashZero,
             timestamp: currentTimestamp,
             minForcedTimestamp: 0,
@@ -552,7 +551,7 @@ describe('PolygonZkEVMUpgraded', () => {
         const batchesForSequence = 5;
         const sequence = {
             transactions: l2txData,
-            transactionsHash: ethers.utils.formatBytes32String("0"),
+            transactionsHash: ethers.utils.formatBytes32String('0'),
             globalExitRoot: ethers.constants.HashZero,
             timestamp: currentTimestamp,
             minForcedTimestamp: 0,
