@@ -54,7 +54,7 @@ async function main() {
         }
     }
     const {consensusContract, dataAvailabilityProtocol} = deployParameters;
-    const supportedConensus = ["PolygonZkEVMEtrog", "PolygonValidiumEtrog"];
+    const supportedConensus = ["PolygonZkEVMEtrog", "PolygonValidiumEtrogIsolated"];
 
     if (!supportedConensus.includes(consensusContract)) {
         throw new Error(`Consensus contract not supported, supported contracts are: ${supportedConensus}`);
