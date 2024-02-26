@@ -75,7 +75,7 @@ async function main() {
     const currentGlobalExitRootAddress = deployOutputParameters.polygonZkEVMGlobalExitRootAddress;
     const currentPolygonZkEVMAddress = deployOutputParameters.polygonZkEVMAddress;
     const currentTimelockAddress = deployOutputParameters.timelockContractAddress;
-    const gasToken = deployOutputParameters.gasToken;
+    const gasToken = deployOutputParameters.gasTokenAddress;
 
     // Load onchain parameters
     const polygonZkEVMFactory = await ethers.getContractFactory("PolygonZkEVM");
