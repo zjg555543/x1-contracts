@@ -13,13 +13,12 @@ import "./lib/PolygonTransparentProxy.sol";
 import "./lib/PolygonAccessControlUpgradeable.sol";
 import "./lib/LegacyZKEVMStateVariables.sol";
 import "./consensus/zkEVM/PolygonZkEVMExistentEtrog.sol";
+import "./consensus/validium/PolygonValidiumEtrogIsolated.sol";
 import "./lib/PolygonConstantsBase.sol";
 
+// review Possible renaming to PolygonL2Manager
 /**
- * Contract responsible for managing rollups and the verification of their batches.
- * This contract will create and update rollups and store all the hashed sequenced data from them.
- * The logic for sequence batches is moved to the `consensus` contracts, while the verification of all of
- * them will be done in this one. In this way, the proof aggregation of the rollups will be easier on a close future.
+ * Contract responsible for managing the exit roots across multiple Rollups
  */
 contract PolygonRollupManager is
     PolygonAccessControlUpgradeable,
@@ -389,10 +388,11 @@ contract PolygonRollupManager is
         address admin,
         address timelock,
         address emergencyCouncil,
-        PolygonZkEVMExistentEtrog polygonZkEVM,
+        PolygonValidiumEtrogIsolated polygonZkEVM,
         IVerifierRollup zkEVMVerifier,
         uint64 zkEVMForkID,
-        uint64 zkEVMChainID
+        uint32 zkEVMChainID,
+        address gasToken
     ) external virtual reinitializer(2) {
         pendingStateTimeout = _pendingStateTimeout;
         trustedAggregatorTimeout = _trustedAggregatorTimeout;
@@ -471,12 +471,13 @@ contract PolygonRollupManager is
         // rollupType and rollupCompatibilityID will be both 0
 
         // Initialize polygon zkevm
-        polygonZkEVM.initializeUpgrade(
+        polygonZkEVM.initialize(
             _legacyAdmin,
             _legacyTrustedSequencer,
+            zkEVMChainID,
+            gasToken,
             _legacyTrustedSequencerURL,
-            _legacyNetworkName,
-            _legacySequencedBatches[zkEVMLastBatchSequenced].accInputHash
+            _legacyNetworkName
         );
     }
 
