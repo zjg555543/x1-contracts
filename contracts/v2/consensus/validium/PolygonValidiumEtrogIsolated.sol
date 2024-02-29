@@ -107,7 +107,11 @@ contract PolygonValidiumEtrogIsolated is PolygonValidiumEtrog {
         );
 
         lastAccInputHash = newAccInputHash;
-        sequencedBatches = 1; // num total batches
+
+        rollupManager.onSequenceBatches(
+            uint64(1), // num total batches
+            newAccInputHash
+        );
 
         // Set initialize variables
         admin = _admin;
