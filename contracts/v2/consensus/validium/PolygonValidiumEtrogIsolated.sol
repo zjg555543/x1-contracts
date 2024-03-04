@@ -18,6 +18,16 @@ contract PolygonValidiumEtrogIsolated is PolygonValidiumEtrog {
     uint256 public sequencedBatches;
 
     /**
+     * @dev Emitted when the system is updated to a etrog using this contract, contain the set up etrog transaction
+     */
+    event UpdateEtrogSequence(
+        uint64 numBatch,
+        bytes transactions,
+        bytes32 lastGlobalExitRoot,
+        address sequencer
+    );
+
+    /**
      * @param _globalExitRootManager Global exit root manager address
      * @param _pol POL token address
      * @param _bridgeAddress Bridge address
@@ -52,7 +62,8 @@ contract PolygonValidiumEtrogIsolated is PolygonValidiumEtrog {
         uint32 networkID,
         address _gasTokenAddress,
         string memory sequencerURL,
-        string memory _networkName
+        string memory _networkName,
+        bytes32 _lastAccInputHash
     ) external override initializer {
         bytes memory gasTokenMetadata;
 
@@ -97,7 +108,7 @@ contract PolygonValidiumEtrogIsolated is PolygonValidiumEtrog {
         // Add the transaction to the sequence as if it was a force transaction
         bytes32 newAccInputHash = keccak256(
             abi.encodePacked(
-                bytes32(0), // Current acc Input hash
+                _lastAccInputHash, // Current acc Input hash
                 currentTransactionsHash,
                 lastGlobalExitRoot, // Global exit root
                 currentTimestamp,
@@ -125,7 +136,12 @@ contract PolygonValidiumEtrogIsolated is PolygonValidiumEtrog {
         // Constant deployment variables
         forceBatchTimeout = 5 days;
 
-        emit InitialSequenceBatches(transaction, lastGlobalExitRoot, sequencer);
+        emit UpdateEtrogSequence(
+            currentBatchSequenced,
+            transaction,
+            lastGlobalExitRoot,
+            _trustedSequencer
+        );
     }
 
     /**

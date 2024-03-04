@@ -477,7 +477,8 @@ contract PolygonRollupManager is
             zkEVMChainID,
             gasToken,
             _legacyTrustedSequencerURL,
-            _legacyNetworkName
+            _legacyNetworkName,
+            _legacySequencedBatches[zkEVMLastBatchSequenced].accInputHash
         );
     }
 
