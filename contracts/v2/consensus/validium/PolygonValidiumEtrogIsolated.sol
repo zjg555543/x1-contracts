@@ -56,7 +56,7 @@ contract PolygonValidiumEtrogIsolated is PolygonValidiumEtrog {
      * @param sequencerURL Trusted sequencer URL
      * @param _networkName L2 network name
      */
-    function initialize(
+    function initializeUpgrade(
         address _admin,
         address sequencer,
         uint32 networkID,
@@ -64,7 +64,7 @@ contract PolygonValidiumEtrogIsolated is PolygonValidiumEtrog {
         string memory sequencerURL,
         string memory _networkName,
         bytes32 _lastAccInputHash
-    ) external override initializer {
+    ) external onlyRollupManager initializer {
         bytes memory gasTokenMetadata;
 
         if (_gasTokenAddress != address(0)) {
@@ -119,7 +119,7 @@ contract PolygonValidiumEtrogIsolated is PolygonValidiumEtrog {
 
         lastAccInputHash = newAccInputHash;
 
-        rollupManager.onSequenceBatches(
+        uint64 currentBatchSequenced = rollupManager.onSequenceBatches(
             uint64(1), // num total batches
             newAccInputHash
         );
@@ -140,7 +140,7 @@ contract PolygonValidiumEtrogIsolated is PolygonValidiumEtrog {
             currentBatchSequenced,
             transaction,
             lastGlobalExitRoot,
-            _trustedSequencer
+            sequencer
         );
     }
 

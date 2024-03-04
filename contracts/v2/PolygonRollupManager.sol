@@ -471,7 +471,7 @@ contract PolygonRollupManager is
         // rollupType and rollupCompatibilityID will be both 0
 
         // Initialize polygon zkevm
-        polygonZkEVM.initialize(
+        polygonZkEVM.initializeUpgrade(
             _legacyAdmin,
             _legacyTrustedSequencer,
             zkEVMChainID,
