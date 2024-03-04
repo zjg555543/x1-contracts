@@ -13,37 +13,9 @@ import "./PolygonValidiumEtrog.sol";
  */
 contract PolygonValidiumEtrogIsolated is PolygonValidiumEtrog {
     using SafeERC20Upgradeable for IERC20Upgradeable;
-    // Transaction that will be injected as a forced transaction, to setup the timestamp on the state root, we just need a well encoded RLP transaction
-    // It's ok if the transaction is not processable
-    /* Encoded transaction:
-      {
-        "from": "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D",
-        "to": "0x4d5Cf5032B2a844602278b01199ED191A86c93ff",
-        "nonce": 42,
-        "data": "0x",
-        "value": "0",
-        "gasLimit": 0,
-        "gasPrice": "0",
-        "chainId": 4242,
-        "overwrite": {
-          "v": "0x1b",
-          "r": "0x00000000000000000000000000000000000000000000000000000005ca1ab1e0",
-          "s": "0x00000000000000000000000000000000000000000000000000000005ca1ab1e0"
-        }
-      }
-    */
-    bytes public constant SET_UP_ETROG_TX =
-        hex"df2a8080944d5cf5032b2a844602278b01199ed191a86c93ff8080821092808000000000000000000000000000000000000000000000000000000005ca1ab1e000000000000000000000000000000000000000000000000000000005ca1ab1e01bff";
 
-    /**
-     * @dev Emitted when the system is updated to a etrog using this contract, contain the set up etrog transaction
-     */
-    event UpdateEtrogSequence(
-        uint64 numBatch,
-        bytes transactions,
-        bytes32 lastGlobalExitRoot,
-        address sequencer
-    );
+    // Keep track of the current sequenced batches before this rollup would be added to the rollup manager
+    uint256 public sequencedBatches;
 
     /**
      * @param _globalExitRootManager Global exit root manager address
@@ -66,23 +38,55 @@ contract PolygonValidiumEtrogIsolated is PolygonValidiumEtrog {
     {}
 
     /**
-     * note This initializer will be called instead of the PolygonRollupBase
-     * This is a especial initializer since the zkEVM it's an already created network
      * @param _admin Admin address
-     * @param _trustedSequencer Trusted sequencer address
-     * @param _trustedSequencerURL Trusted sequencer URL
+     * @param sequencer Trusted sequencer address
+     * @param networkID Indicates the network identifier that will be used in the bridge
+     * @param _gasTokenAddress Indicates the token address in mainnet that will be used as a gas token
+     * Note if a wrapped token of the bridge is used, the original network and address of this wrapped are used instead
+     * @param sequencerURL Trusted sequencer URL
      * @param _networkName L2 network name
-     * @param _lastAccInputHash Acc input hash
      */
-    function initializeUpgrade(
+    function initialize(
         address _admin,
-        address _trustedSequencer,
-        string memory _trustedSequencerURL,
-        string memory _networkName,
-        bytes32 _lastAccInputHash
-    ) external onlyRollupManager initializer {
-        // Set up etrog Tx
-        bytes memory transaction = SET_UP_ETROG_TX;
+        address sequencer,
+        uint32 networkID,
+        address _gasTokenAddress,
+        string memory sequencerURL,
+        string memory _networkName
+    ) external override initializer {
+        bytes memory gasTokenMetadata;
+
+        if (_gasTokenAddress != address(0)) {
+            // Ask for token metadata, the same way is enconded in the bridge
+            // Note that this function will revert if the token is not in this network
+            // Note that this could be a possible reentrant call, but cannot make changes on the state since are static call
+            gasTokenMetadata = bridgeAddress.getTokenMetadata(_gasTokenAddress);
+
+            // Check gas token address on the bridge
+            (
+                uint32 originWrappedNetwork,
+                address originWrappedAddress
+            ) = bridgeAddress.wrappedTokenToTokenInfo(_gasTokenAddress);
+
+            if (originWrappedNetwork != 0) {
+                // It's a wrapped token, get the wrapped parameters
+                gasTokenAddress = originWrappedAddress;
+                gasTokenNetwork = originWrappedNetwork;
+            } else {
+                // gasTokenNetwork will be mainnet, for instance 0
+                gasTokenAddress = _gasTokenAddress;
+            }
+        }
+        // Sequence transaction to initilize the bridge
+
+        // Calculate transaction to initialize the bridge
+        bytes memory transaction = generateInitializeTransaction(
+            networkID,
+            gasTokenAddress,
+            gasTokenNetwork,
+            gasTokenMetadata
+        );
+
         bytes32 currentTransactionsHash = keccak256(transaction);
 
         // Get current timestamp and global exit root
@@ -93,43 +97,201 @@ contract PolygonValidiumEtrogIsolated is PolygonValidiumEtrog {
         // Add the transaction to the sequence as if it was a force transaction
         bytes32 newAccInputHash = keccak256(
             abi.encodePacked(
-                _lastAccInputHash, // Last acc Input hash
+                bytes32(0), // Current acc Input hash
                 currentTransactionsHash,
                 lastGlobalExitRoot, // Global exit root
                 currentTimestamp,
-                _trustedSequencer,
+                sequencer,
                 blockhash(block.number - 1)
             )
         );
 
-        // Set acumulated input hash
         lastAccInputHash = newAccInputHash;
 
-        uint64 currentBatchSequenced = rollupManager.onSequenceBatches(
+        rollupManager.onSequenceBatches(
             uint64(1), // num total batches
             newAccInputHash
         );
 
-        // Set zkEVM variables
+        // Set initialize variables
         admin = _admin;
-        trustedSequencer = _trustedSequencer;
+        trustedSequencer = sequencer;
 
-        trustedSequencerURL = _trustedSequencerURL;
+        trustedSequencerURL = sequencerURL;
         networkName = _networkName;
 
         forceBatchAddress = _admin;
 
-        // Constant variables
+        // Constant deployment variables
         forceBatchTimeout = 5 days;
 
-        // Both gasTokenAddress and gasTokenNetwork are 0, since it uses ether as gas token
-        // Therefore is not necessary to set the variables
+        emit InitialSequenceBatches(transaction, lastGlobalExitRoot, sequencer);
+    }
 
-        emit UpdateEtrogSequence(
-            currentBatchSequenced,
-            transaction,
-            lastGlobalExitRoot,
-            _trustedSequencer
+    /**
+     * @notice Allows a sequencer to send multiple batches
+     * @param batches Struct array which holds the necessary data to append new batches to the sequence
+     * @param l2Coinbase Address that will receive the fees from L2
+     * @param dataAvailabilityMessage Byte array containing the signatures and all the addresses of the committee in ascending order
+     * [signature 0, ..., signature requiredAmountOfSignatures -1, address 0, ... address N]
+     * note that each ECDSA signatures are used, therefore each one must be 65 bytes
+     * note Pol is not a reentrant token
+     */
+    function sequenceBatchesValidium(
+        ValidiumBatchData[] calldata batches,
+        address l2Coinbase,
+        bytes calldata dataAvailabilityMessage
+    ) external override onlyTrustedSequencer {
+        uint256 batchesNum = batches.length;
+        if (batchesNum == 0) {
+            revert SequenceZeroBatches();
+        }
+
+        if (batchesNum > _MAX_VERIFY_BATCHES) {
+            revert ExceedMaxVerifyBatches();
+        }
+
+        // Update global exit root if there are new deposits
+        bridgeAddress.updateGlobalExitRoot();
+
+        // Get global batch variables
+        bytes32 l1InfoRoot = globalExitRootManager.getRoot();
+
+        // Store storage variables in memory, to save gas, because will be overrided multiple times
+        uint64 currentLastForceBatchSequenced = lastForceBatchSequenced;
+        bytes32 currentAccInputHash = lastAccInputHash;
+
+        // Store in a temporal variable, for avoid access again the storage slot
+        uint64 initLastForceBatchSequenced = currentLastForceBatchSequenced;
+
+        // Accumulated sequenced transaction hash to verify them afterward against the dataAvailabilityProtocol
+        bytes32 accumulatedNonForcedTransactionsHash = bytes32(0);
+
+        for (uint256 i = 0; i < batchesNum; i++) {
+            // Load current sequence
+            ValidiumBatchData memory currentBatch = batches[i];
+
+            // Check if it's a forced batch
+            if (currentBatch.forcedTimestamp > 0) {
+                currentLastForceBatchSequenced++;
+
+                // Check forced data matches
+                bytes32 hashedForcedBatchData = keccak256(
+                    abi.encodePacked(
+                        currentBatch.transactionsHash,
+                        currentBatch.forcedGlobalExitRoot,
+                        currentBatch.forcedTimestamp,
+                        currentBatch.forcedBlockHashL1
+                    )
+                );
+
+                if (
+                    hashedForcedBatchData !=
+                    forcedBatches[currentLastForceBatchSequenced]
+                ) {
+                    revert ForcedDataDoesNotMatch();
+                }
+
+                // Calculate next accumulated input hash
+                currentAccInputHash = keccak256(
+                    abi.encodePacked(
+                        currentAccInputHash,
+                        currentBatch.transactionsHash,
+                        currentBatch.forcedGlobalExitRoot,
+                        currentBatch.forcedTimestamp,
+                        l2Coinbase,
+                        currentBatch.forcedBlockHashL1
+                    )
+                );
+
+                // Delete forceBatch data since won't be used anymore
+                delete forcedBatches[currentLastForceBatchSequenced];
+            } else {
+                // Accumulate non forced transactions hash
+                accumulatedNonForcedTransactionsHash = keccak256(
+                    abi.encodePacked(
+                        accumulatedNonForcedTransactionsHash,
+                        currentBatch.transactionsHash
+                    )
+                );
+
+                // Note that forcedGlobalExitRoot and forcedBlockHashL1 remain unused and unchecked in this path
+                // The synchronizer should be aware of that
+
+                // Calculate next accumulated input hash
+                currentAccInputHash = keccak256(
+                    abi.encodePacked(
+                        currentAccInputHash,
+                        currentBatch.transactionsHash,
+                        l1InfoRoot,
+                        uint64(block.timestamp),
+                        l2Coinbase,
+                        bytes32(0)
+                    )
+                );
+            }
+        }
+
+        // Sanity check, should be unreachable
+        if (currentLastForceBatchSequenced > lastForceBatch) {
+            revert ForceBatchesOverflow();
+        }
+
+        // Store back the storage variables
+        lastAccInputHash = currentAccInputHash;
+
+        uint256 nonForcedBatchesSequenced = batchesNum;
+
+        // Check if there has been forced batches
+        if (currentLastForceBatchSequenced != initLastForceBatchSequenced) {
+            uint64 forcedBatchesSequenced = currentLastForceBatchSequenced -
+                initLastForceBatchSequenced;
+            // substract forced batches
+            nonForcedBatchesSequenced -= forcedBatchesSequenced;
+
+            // Transfer pol for every forced batch submitted
+            pol.safeTransfer(
+                address(rollupManager),
+                calculatePolPerForceBatch() * (forcedBatchesSequenced)
+            );
+
+            // Store new last force batch sequenced
+            lastForceBatchSequenced = currentLastForceBatchSequenced;
+        }
+
+        // Pay collateral for every non-forced batch submitted
+        if (nonForcedBatchesSequenced != 0) {
+            pol.safeTransferFrom(
+                msg.sender,
+                address(rollupManager),
+                rollupManager.getBatchFee() * nonForcedBatchesSequenced
+            );
+
+            // Validate that the data availability protocol accepts the dataAvailabilityMessage
+            // note This is a view function, so there's not much risk even if this contract was vulnerable to reentrant attacks
+            dataAvailabilityProtocol.verifyMessage(
+                accumulatedNonForcedTransactionsHash,
+                dataAvailabilityMessage
+            );
+        }
+
+        (bool success, bytes memory returnData) = address(rollupManager).call(
+            abi.encodeCall(
+                PolygonRollupManager.onSequenceBatches,
+                (uint64(sequencedBatches + batchesNum), currentAccInputHash)
+            )
         );
+
+        uint64 currentBatchSequenced;
+
+        if (success) {
+            sequencedBatches = 0;
+            currentBatchSequenced = abi.decode(returnData, (uint64));
+        } else {
+            currentBatchSequenced = uint64(sequencedBatches + batchesNum);
+            sequencedBatches = currentBatchSequenced;
+        }
+
+        emit SequenceBatches(currentBatchSequenced, l1InfoRoot);
     }
 }
