@@ -338,7 +338,7 @@ async function main() {
         proxyAdmin.interface.encodeFunctionData("upgradeAndCall", [
             currentPolygonZkEVMAddress,
             implRollupManager,
-            PolygonRollupManagerFactory.interface.encodeFunctionData("initializeUpgrade", [
+            PolygonRollupManagerFactory.interface.encodeFunctionData("initialize", [
                 trustedAggregator,
                 pendingStateTimeout,
                 trustedAggregatorTimeout,
