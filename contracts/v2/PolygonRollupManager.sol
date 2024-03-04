@@ -474,8 +474,6 @@ contract PolygonRollupManager is
         polygonZkEVM.initializeUpgrade(
             _legacyAdmin,
             _legacyTrustedSequencer,
-            zkEVMChainID,
-            gasToken,
             _legacyTrustedSequencerURL,
             _legacyNetworkName,
             _legacySequencedBatches[zkEVMLastBatchSequenced].accInputHash
