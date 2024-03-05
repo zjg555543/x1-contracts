@@ -136,7 +136,7 @@ contract PolygonZkEVM is
     uint256 internal constant _MAX_BATCH_FEE = 1000 ether;
 
     // Min value batch fee
-    uint256 internal constant _MIN_BATCH_FEE = 1 gwei;
+    uint256 internal constant _MIN_BATCH_FEE = 0 gwei;
 
     // Goldilocks prime field
     uint256 internal constant _GOLDILOCKS_PRIME_FIELD = 0xFFFFFFFF00000001; // 2 ** 64 - 2 ** 32 + 1
