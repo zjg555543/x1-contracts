@@ -178,7 +178,7 @@ async function main() {
         deployOutput.polygonZkEVMGlobalExitRootAddress,
         deployOutput.polTokenAddress,
         deployOutput.polygonZkEVMBridgeAddress,
-        deployOutput.polygonRollupManager
+        deployOutput.polygonRollupManagerAddress
     );
     await PolygonconsensusContract.waitForDeployment();
 
