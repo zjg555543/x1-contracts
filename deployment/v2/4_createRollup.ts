@@ -135,7 +135,7 @@ async function main() {
     // Load Rollup manager
     const PolgonRollupManagerFactory = await ethers.getContractFactory("PolygonRollupManager", deployer);
     const rollupManagerContract = PolgonRollupManagerFactory.attach(
-        deployOutput.polygonRollupManager
+        deployOutput.polygonRollupManagerAddress
     ) as PolygonRollupManager;
 
     const DEFAULT_ADMIN_ROLE = ethers.ZeroHash;
