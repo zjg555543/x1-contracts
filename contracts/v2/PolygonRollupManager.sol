@@ -398,7 +398,7 @@ contract PolygonRollupManager is
         trustedAggregatorTimeout = _trustedAggregatorTimeout;
 
         // Constant deployment variables
-        _batchFee = 0 ether; // 0.1 POL
+        _batchFee = 0 ether; // 0 POL
         verifyBatchTimeTarget = 30 minutes;
         multiplierBatchFee = 1002;
 

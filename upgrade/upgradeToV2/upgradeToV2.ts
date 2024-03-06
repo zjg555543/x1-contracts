@@ -349,7 +349,6 @@ async function main() {
                 verifierContract.target,
                 newForkID,
                 chainID,
-                gasToken,
             ]),
         ]),
         ethers.ZeroHash, // predecesoor
