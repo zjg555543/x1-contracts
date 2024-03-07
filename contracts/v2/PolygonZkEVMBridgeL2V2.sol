@@ -2,15 +2,15 @@
 
 pragma solidity 0.8.20;
 
-import "../lib/DepositContractV2.sol";
+import "./lib/DepositContractV2.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
-import "../../lib/TokenWrapped.sol";
-import "../../interfaces/IBasePolygonZkEVMGlobalExitRoot.sol";
-import "../../interfaces/IBridgeMessageReceiver.sol";
-import "../interfaces/IPolygonZkEVMBridgeV2.sol";
-import "../../lib/EmergencyManager.sol";
-import "../../lib/GlobalExitRootLib.sol";
+import "../lib/TokenWrapped.sol";
+import "../interfaces/IBasePolygonZkEVMGlobalExitRoot.sol";
+import "../interfaces/IBridgeMessageReceiver.sol";
+import "./interfaces/IPolygonZkEVMBridgeV2.sol";
+import "../lib/EmergencyManager.sol";
+import "../lib/GlobalExitRootLib.sol";
 
 /**
  * PolygonZkEVMBridge that will be deployed on Ethereum and all Polygon rollups
@@ -155,6 +155,7 @@ contract PolygonZkEVMBridgeL2V2 is
         uint32 _gasTokenNetwork,
         IBasePolygonZkEVMGlobalExitRoot _globalExitRootManager,
         address _polygonRollupManager,
+        address _WETHToken,
         bytes memory _gasTokenMetadata
     ) external virtual initializer {
         networkID = _networkID;
@@ -176,11 +177,7 @@ contract PolygonZkEVMBridgeL2V2 is
             gasTokenMetadata = _gasTokenMetadata;
 
             // Create a wrapped token for WETH, with salt == 0
-            WETHToken = _deployWrappedToken(
-                0, // salt
-                abi.encode("Wrapped Ether", "WETH", 18)
-            );
-        }
+            WETHToken = TokenWrapped(_WETHToken);
 
         // Initialize OZ contracts
         __ReentrancyGuard_init();
