@@ -89,7 +89,7 @@ async function main() {
     console.log("timelockAddress: ", timelockContract.target, {timelockDelay});
 
     // prapare upgrades
-    const polygonZkEVMBridgeFactory = await ethers.getContractFactory("PolygonZkEVMBridgeV2", deployer);
+    const polygonZkEVMBridgeFactory = await ethers.getContractFactory("PolygonZkEVMBridgeL2V2", deployer);
 
     const newBridgeImpl = await upgrades.prepareUpgrade(currentBridgeAddress, polygonZkEVMBridgeFactory, {
         unsafeAllow: ["constructor"],
