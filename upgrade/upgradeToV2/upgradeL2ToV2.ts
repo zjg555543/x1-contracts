@@ -69,7 +69,7 @@ async function main() {
     console.log("deploying with: ", deployer.address);
 
     // Prepare Upgrade PolygonZkEVMBridge
-    const PreviousBridgeFactory = (await ethers.getContractFactory("PolygonZkEVMBridge")) as any;
+    const PreviousBridgeFactory = (await ethers.getContractFactory("PolygonZkEVMBridgeL2")) as any;
 
     // Import OZ upgrades
     await upgrades.forceImport(currentBridgeAddress as string, PreviousBridgeFactory, "transparent" as any);
@@ -90,7 +90,7 @@ async function main() {
 
     // prapare upgrades
     const polygonZkEVMBridgeFactory = await ethers.getContractFactory("PolygonZkEVMBridgeL2V2", deployer);
-
+    console.log("Upgrading PolygonZkEVMBridge to V2");
     const newBridgeImpl = await upgrades.prepareUpgrade(currentBridgeAddress, polygonZkEVMBridgeFactory, {
         unsafeAllow: ["constructor"],
     });
