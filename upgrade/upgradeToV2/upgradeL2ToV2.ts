@@ -106,13 +106,27 @@ async function main() {
         [deployParameters.gasTokenName, deployParameters.gasTokenSymbol, deployParameters.gasTokenDecimals]
     );
 
+    // uint32 _networkID,
+    // address _gasTokenAddress,
+    // uint32 _gasTokenNetwork,
+    // IBasePolygonZkEVMGlobalExitRoot _globalExitRootManager,
+    // address _polygonRollupManager,
+    // bytes memory _gasTokenMetadata
+
     const operationBridge = genOperation(
         proxyAdmin.target,
         0, // value
         proxyAdmin.interface.encodeFunctionData("upgradeAndCall", [
             currentBridgeAddress,
             newBridgeImpl,
-            polygonZkEVMBridgeFactory.interface.encodeFunctionData("initialize", [metaData]),
+            polygonZkEVMBridgeFactory.interface.encodeFunctionData("initialize", [
+                0, // networkID
+                ethers.ZeroAddress, // gasTokenAddress
+                0, // gasTokenNetwork
+                ethers.ZeroAddress, // globalExitRootManager
+                ethers.ZeroAddress, // polygonRollupManager
+                metaData,
+            ]),
         ]),
         ethers.ZeroHash, // predecesoor
         salt // salt
