@@ -69,7 +69,7 @@ async function main() {
     console.log("deploying with: ", deployer.address);
 
     // Prepare Upgrade PolygonZkEVMBridge
-    const PreviousBridgeFactory = (await ethers.getContractFactory("PolygonZkEVMBridge")) as any;
+    const PreviousBridgeFactory = (await ethers.getContractFactory("PolygonZkEVMBridgeL2")) as any;
 
     // Import OZ upgrades
     await upgrades.forceImport(currentBridgeAddress as string, PreviousBridgeFactory, "transparent" as any);
@@ -104,7 +104,19 @@ async function main() {
     const operationBridge = genOperation(
         proxyAdmin.target,
         0, // value
-        proxyAdmin.interface.encodeFunctionData("upgrade", [currentBridgeAddress, newBridgeImpl]),
+        proxyAdmin.interface.encodeFunctionData("upgradeAndCall", [
+            currentBridgeAddress,
+            newBridgeImpl,
+            polygonZkEVMBridgeFactory.interface.encodeFunctionData("initialize", [
+                deployParameters.networkID,
+                deployParameters.gasTokenAddress,
+                deployParameters.gasTokenNetwork,
+                deployParameters.globalExitRootAddress,
+                deployParameters.rollupManagerAddress,
+                deployParameters.WETHToken,
+                deployParameters.gasTokenMetadata, // 0x000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000001200000000000000000000000000000000000000000000000000000000000000034f4b42000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000034f4b420000000000000000000000000000000000000000000000000000000000
+            ]),
+        ]),
         ethers.ZeroHash, // predecesoor
         salt // salt
     );
