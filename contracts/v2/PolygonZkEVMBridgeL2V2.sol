@@ -140,46 +140,13 @@ contract PolygonZkEVMBridgeL2V2 is
     }
 
     /**
-     * @param _networkID networkID
-     * @param _gasTokenAddress gas token address
-     * @param _gasTokenNetwork gas token network
-     * @param _globalExitRootManager global exit root manager address
-     * @param _polygonRollupManager polygonZkEVM address
-     * @notice The value of `_polygonRollupManager` on the L2 deployment of the contract will be address(0), so
-     * emergency state is not possible for the L2 deployment of the bridge, intentionally
      * @param _gasTokenMetadata Abi encoded gas token metadata
      */
     function initialize(
-        uint32 _networkID,
-        address _gasTokenAddress,
-        uint32 _gasTokenNetwork,
-        IBasePolygonZkEVMGlobalExitRoot _globalExitRootManager,
-        address _polygonRollupManager,
-        address _WETHToken,
         bytes memory _gasTokenMetadata
     ) external virtual initializer {
-        networkID = _networkID;
-        globalExitRootManager = _globalExitRootManager;
-        polygonRollupManager = _polygonRollupManager;
+        gasTokenMetadata = _gasTokenMetadata;
 
-        // Set gas token
-        if (_gasTokenAddress == address(0)) {
-            // Gas token will be ether
-            if (_gasTokenNetwork != 0) {
-                revert GasTokenNetworkMustBeZeroOnEther();
-            }
-            // WETHToken, gasTokenAddress and gasTokenNetwork will be 0
-            // gasTokenMetadata will be empty
-        } else {
-            // Gas token will be an erc20
-            gasTokenAddress = _gasTokenAddress;
-            gasTokenNetwork = _gasTokenNetwork;
-            gasTokenMetadata = _gasTokenMetadata;
-
-            // Create a wrapped token for WETH, with salt == 0
-            WETHToken = TokenWrapped(_WETHToken);
-
-        // Initialize OZ contracts
         __ReentrancyGuard_init();
     }
 
