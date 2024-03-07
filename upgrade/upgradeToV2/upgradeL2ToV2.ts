@@ -101,21 +101,18 @@ async function main() {
     console.log("you can verify the new impl address with:");
     console.log(`npx hardhat verify ${newBridgeImpl} --network ${process.env.HARDHAT_NETWORK}`);
 
+    const metaData = ethers.AbiCoder.defaultAbiCoder().encode(
+        ["string", "string", "uint8"],
+        [deployParameters.gasTokenName, deployParameters.gasTokenSymbol, deployParameters.gasTokenDecimals]
+    );
+
     const operationBridge = genOperation(
         proxyAdmin.target,
         0, // value
         proxyAdmin.interface.encodeFunctionData("upgradeAndCall", [
             currentBridgeAddress,
             newBridgeImpl,
-            polygonZkEVMBridgeFactory.interface.encodeFunctionData("initialize", [
-                deployParameters.networkID,
-                deployParameters.gasTokenAddress,
-                deployParameters.gasTokenNetwork,
-                deployParameters.globalExitRootAddress,
-                deployParameters.rollupManagerAddress,
-                deployParameters.WETHToken,
-                deployParameters.gasTokenMetadata, // 0x000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000001200000000000000000000000000000000000000000000000000000000000000034f4b42000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000034f4b420000000000000000000000000000000000000000000000000000000000
-            ]),
+            polygonZkEVMBridgeFactory.interface.encodeFunctionData("initialize", [metaData]),
         ]),
         ethers.ZeroHash, // predecesoor
         salt // salt
